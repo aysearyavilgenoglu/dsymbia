@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="D-SymBIA — Building-Integrated Agriculture (SFU SIAT research prototype)">
+<title>D-SymBIA — Building-Integrated Agriculture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS — locked to palette image
+   #1E8C5A green | #3B82D4 blue | #DCE9F8 pale-blue
+   #F2B89A peach  | #C8684A terra | #DBA830 amber
+   #B83020 red    | #000 border   | #fff white
+   Urbanist font throughout
+═══════════════════════════════════════════════════ */
+:root {
+  --c-green:  #1E8C5A;
+  --c-blue:   #3B82D4;
+  --c-blt:    #DCE9F8;
+  --c-peach:  #F2B89A;
+  --c-terra:  #C8684A;
+  --c-amber:  #DBA830;
+  --c-red:    #B83020;
+  /* SFU brand red — accents only (Communicators Toolkit) */
+  --sfu-red:  #CC0636;
+  --c-black:  #000000;
+  --c-white:  #FFFFFF;
+  --c-off:    #E5E5E5;  /* matches Figma bg */
+  --c-muted:  #666666;
+  --nav-h:    64px;     /* matches Figma exactly */
+  --tab-h:    44px;
+  --lp-w:     326px;    /* matches Figma left panel */
+  --rp-w:     326px;    /* matches Figma right panel */
+  --border:   0.5px solid #000;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 300;
+  font-size: 11px;
+  color: var(--c-black);
+  background: rgba(229,229,229,0.5);
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ═══════════ TOPBAR (exact Figma match) ════════════ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: var(--c-white);
+  border-bottom: var(--border);
+  display: flex; align-items: center;
+  flex-wrap: nowrap;
+  z-index: 300;
+}
+.tb-siat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 4px 12px;
+  border-right: var(--border);
+  flex-shrink: 0;
+  max-width: min(200px, 28vw);
+}
+.tb-siat-line {
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--c-muted);
+  letter-spacing: 0.01em;
+}
+.tb-siat-accent {
+  color: var(--c-black);
+  border-left: 2px solid var(--sfu-red);
+  padding-left: 6px;
+  margin-left: -2px;
+}
+.tb-logo {
+  display: flex; align-items: center; gap: 0;
+  padding: 0 8px;
+  height: 100%;
+  flex-shrink: 0;
+}
+.tb-logo svg { width: 60px; height: 30px; }
+.tb-search {
+  flex: 1;
+  border: var(--border);
+  display: flex; align-items: center; gap: 12px;
+  padding: 3px 5px;
+  height: 30px;
+  margin: 0 8px;
+}
+.tb-search svg { opacity: 0.5; width: 24px; height: 24px; flex-shrink: 0; }
+.tb-search input {
+  border: none; outline: none;
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 300; font-size: 11px;
+  color: var(--c-black); background: transparent;
+  width: 100%; opacity: 0.5;
+}
+.tb-search input::placeholder { opacity: 0.7; }
+
+/* separator line under topbar — exact Figma */
+.topbar-line {
+  position: fixed; top: var(--nav-h); left: 0; right: 0;
+  height: 0.5px; background: #000; z-index: 300;
+}
+
+/* ═══════════ TAB BAR (bottom, Figma style) ══════════ */
+.tabbar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--tab-h);
+  background: var(--c-white);
+  border-top: var(--border);
+  display: flex; align-items: stretch;
+  z-index: 300;
+}
+.tab {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 26px;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 14px; font-weight: 500;
+  color: var(--c-black);
+  cursor: pointer; text-decoration: none;
+  border-right: var(--border);
+  transition: background 0.12s;
+  white-space: nowrap;
+  background: var(--c-white);
+}
+.tab:hover { background: var(--c-off); }
+.tab.active { background: var(--c-off); }
+.tab svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ═══════════ MAIN LAYOUT ════════════════════════════ */
+.main {
+  margin-top: var(--nav-h);
+  margin-bottom: var(--tab-h);
+  height: calc(100vh - var(--nav-h) - var(--tab-h));
+  display: flex;
+  position: relative;
+}
+
+/* ═══════════ PAGES (tab content) ════════════════════ */
+.page { display: none; width: 100%; height: 100%; flex-shrink: 0; }
+.page.active { display: flex; }
+
+/* ═══════════ 3-COLUMN LAYOUT ════════════════════════ */
+.layout { display: flex; width: 100%; height: 100%; }
+
+/* ═══════════ LEFT PANEL — exact Figma ══════════════ */
+.lp {
+  width: var(--lp-w);
+  flex-shrink: 0;
+  background: var(--c-white);
+  border-right: var(--border);
+  overflow-y: auto;
+  position: relative;
+  transition: width 0.2s ease;
+}
+.lp.closed { width: 8px; overflow: hidden; }
+.lp-toggle {
+  position: absolute;
+  right: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 8px; height: 32px;
+  background: #d9d9d9;
+  border-left: var(--border);
+  cursor: pointer;
+  z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; color: #555;
+}
+.lp.closed .lp-toggle { background: #d9d9d9; }
+
+/* Panel typography — Figma exact */
+.p-h1 {
+  font-size: 28px; font-weight: 600;
+  padding: 9px 8px 6px;
+  border-bottom: var(--border);
+  line-height: 1;
+}
+.p-h2 {
+  font-size: 18px; font-weight: 600;
+  padding: 6px 8px;
+  border-bottom: var(--border);
+}
+.p-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 8px;
+  font-size: 11px; font-weight: 300;
+  border-bottom: 0.5px solid rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+  line-height: 1.3;
+}
+.p-item:last-of-type { border-bottom: none; }
+.p-item:hover { background: rgba(229,229,229,0.4); }
+.p-item.active { background: #E1F1FF; }
+.p-item-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.p-item-sub { font-size: 9px; color: var(--c-muted); font-family: 'DM Mono', monospace; margin-top: 1px; }
+/* Figma scrollbar indicator */
+.p-scrollbar {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 8px; border-left: var(--border);
+}
+.p-scrollthumb { width: 8px; height: 32px; background: #d9d9d9; }
+
+/* ═══════════ CENTER AREA ════════════════════════════ */
+.center {
+  flex: 1;
+  background: rgba(229,229,229,0.5);
+  position: relative;
+  overflow: hidden;
+}
+.center-dark { background: #0E1608; }
+.center-scroll { flex: 1; overflow-y: auto; background: rgba(229,229,229,0.5); }
+
+/* ═══════════ RIGHT PANEL — exact Figma ══════════════ */
+.rp {
+  width: var(--rp-w);
+  flex-shrink: 0;
+  background: var(--c-white);
+  border-left: var(--border);
+  overflow-y: auto;
+  position: relative;
+  transition: width 0.2s ease;
+}
+/* Collapsed: keep narrow strip so toggle stays visible (width:0 hid the control) */
+.rp.closed {
+  width: 8px;
+  min-width: 8px;
+  overflow: hidden;
+  border-left: var(--border);
+}
+.rp-toggle {
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 8px; height: 32px;
+  background: #d9d9d9;
+  border-right: var(--border);
+  cursor: pointer;
+  z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; color: #555;
+}
+.rp.closed .rp-toggle { z-index: 25; }
+
+/* Right panel content — Figma exact */
+.rp-h2 { font-size: 18px; font-weight: 600; padding: 5px 8px; border-bottom: var(--border); }
+.rp-line { height: 0.5px; background: #000; }
+.rp-eyebrow {
+  font-family: 'Inter', sans-serif; /* Figma uses Inter for eyebrow */
+  font-size: 8px; font-weight: 300;
+  padding: 0 8px; color: var(--c-black);
+}
+.rp-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px; font-weight: 400;
+  color: var(--c-black);
+}
+.rp-h3 { font-size: 14px; font-weight: 500; padding: 5px 8px; border-bottom: var(--border); }
+
+/* Meta row (Area / BIA Ratio / Struct. Cap / Orientation) */
+.meta-row {
+  display: flex; border-bottom: var(--border);
+}
+.meta-cell {
+  flex: 1; padding: 4px;
+  border-right: var(--border);
+  text-align: center;
+}
+.meta-cell:last-child { border-right: none; }
+.meta-cell .lbl { font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 400; color: var(--c-muted); }
+.meta-cell .val { font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 300; }
+
+/* DLI table */
+.dli-table { width: 100%; border-collapse: collapse; }
+.dli-table th, .dli-table td {
+  border: var(--border); padding: 4px;
+  text-align: center;
+  font-family: 'Inter', sans-serif; font-size: 9px;
+}
+.dli-table th { font-weight: 400; background: rgba(229,229,229,0.3); }
+.dli-table td { font-weight: 300; }
+.dli-hi { background: #cdf0d0; }
+.dli-md { background: #fdefc0; }
+.dli-lo { background: #ffd0c8; }
+
+/* Warn box */
+.warn {
+  padding: 5px 8px;
+  border-bottom: var(--border);
+  background: #fffbf0;
+}
+.warn .wt { font-size: 14px; font-weight: 500; }
+.warn .ws { font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 300; line-height: 1.5; }
+
+/* Compat rows */
+.compat-row {
+  display: flex; justify-content: space-between;
+  padding: 5px 8px; border-bottom: 0.5px solid rgba(0,0,0,0.15);
+  font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 300;
+}
+
+/* CTA buttons — exact Figma */
+.cta-row { display: flex; border-top: var(--border); }
+.cta-btn {
+  flex: 1; border: none; cursor: pointer;
+  height: 31px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5px;
+  font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 300;
+  letter-spacing: 0.02em; text-transform: uppercase;
+  transition: opacity 0.1s;
+}
+.cta-btn:hover { opacity: 0.85; }
+.cta-sec { background: var(--c-white); color: var(--c-black); border-right: var(--border); }
+.cta-pri { background: #099273; color: var(--c-white); }
+.cta-btn svg { width: 24px; height: 24px; flex-shrink: 0; }
+
+/* ═══════════ 3D VIEWPORT ════════════════════════════ */
+#vp { isolation: isolate; }
+#three-canvas {
+  position: absolute; inset: 0; z-index: 2;
+  width: 100%!important; height: 100%!important;
+  display: block;
+}
+#vp > svg { position: relative; z-index: 0; }
+.hud { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.hud-label {
+  position: absolute; top: 14px; left: 14px;
+  background: rgba(255,255,255,0.08);
+  border: 0.7px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.8);
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  padding: 5px 10px;
+}
+.hud-legend {
+  position: absolute; top: 50px; left: 14px;
+  background: rgba(0,0,0,0.55);
+  border: 0.5px solid rgba(255,255,255,0.15);
+  padding: 8px 10px;
+}
+.hud-legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: rgba(200,200,200,0.9); margin-bottom: 4px;
+}
+.hud-legend-item:last-child { margin-bottom: 0; }
+.hud-dot { width: 8px; height: 8px; flex-shrink: 0; }
+.hud-hint {
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,0.06); border: 0.5px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.45); font-family: 'DM Mono', monospace; font-size: 9px;
+  padding: 4px 14px; white-space: nowrap;
+}
+#surf-tip {
+  position: absolute; pointer-events: none; z-index: 20;
+  background: rgba(0,0,0,.88); border: 0.5px solid rgba(255,255,255,.2);
+  color: #fff; font-family: 'DM Mono', monospace; font-size: 9px;
+  padding: 8px 12px; opacity: 0; transition: opacity .15s; min-width: 155px;
+}
+#surf-tip.on { opacity: 1; }
+#surf-tip strong { display: block; color: #1E8C5A; font-size: 10px; margin-bottom: 4px; }
+.tr { display: flex; justify-content: space-between; gap: 16px; margin-top: 2px; }
+
+/* Loading */
+.loading {
+  position: absolute; inset: 0;
+  background: rgba(10,18,8,.92);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 50; color: rgba(255,255,255,.7);
+  font-family: 'Urbanist', sans-serif; font-size: 13px; gap: 14px;
+}
+.spinner { width: 28px; height: 28px; border: 2px solid rgba(255,255,255,.1); border-top-color: #1E8C5A; border-radius: 50%; animation: sp .8s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+
+/* ═══════════ CHART SECTIONS ════════════════════════ */
+.chart-section {
+  background: var(--c-white);
+  padding: 16px 16px 20px;
+  border-bottom: var(--border);
+  margin-bottom: 1px;
+}
+.chart-section:last-child { border-bottom: none; margin-bottom: 0; }
+.chart-h2 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+.chart-sub { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--c-muted); margin-bottom: 12px; }
+.vl-chart {
+  min-height: 200px;
+  width: 100%;
+}
+.vl-chart .vega-embed, .vl-chart .vega-embed canvas, .vl-chart .vega-embed svg {
+  max-width: 100%;
+}
+
+/* Bar chart (manual) */
+.bar-wrap { margin-bottom: 8px; }
+.bar-meta { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px; }
+.bar-meta span:last-child { font-family: 'DM Mono', monospace; color: var(--c-muted); }
+.bar-bg { height: 18px; background: rgba(0,0,0,.06); overflow: hidden; }
+.bar-fill { height: 100%; display: flex; align-items: center; padding-left: 6px; font-size: 9px; font-weight: 600; color: #fff; font-family: 'DM Mono', monospace; }
+
+/* Tables */
+.data-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.data-table th { padding: 6px 8px; text-align: center; font-weight: 600; border: var(--border); background: rgba(229,229,229,0.4); font-size: 11px; }
+.data-table td { padding: 6px 8px; text-align: center; border: var(--border); font-family: 'DM Mono', monospace; }
+.data-table .row-lbl { text-align: left; font-family: 'Urbanist', sans-serif; font-weight: 400; color: var(--c-muted); }
+.compat-H { background: #cdf0d0; color: #0a4d1e; font-weight: 700; }
+.compat-M { background: #fdefc0; color: #6b4200; font-weight: 700; }
+.compat-L { background: #ffd0c8; color: #7a1a0a; font-weight: 700; }
+
+/* Flow nodes */
+.flow-wrap { display: flex; align-items: center; flex-wrap: wrap; gap: 0; font-size: 10px; font-family: 'DM Mono', monospace; margin-bottom: 10px; }
+.flow-node { border: var(--border); padding: 7px 9px; background: #fff; min-width: 75px; text-align: center; }
+.flow-node strong { display: block; font-family: 'Urbanist', sans-serif; font-size: 11px; font-weight: 600; margin-bottom: 1px; }
+.flow-arrow { padding: 0 4px; color: var(--c-muted); font-size: 14px; }
+
+/* Key findings */
+.finding { display: flex; gap: 8px; padding: 9px 8px; border-bottom: 0.5px solid rgba(0,0,0,.08); font-size: 11px; line-height: 1.5; }
+.finding-dot { width: 8px; height: 8px; flex-shrink: 0; margin-top: 3px; }
+.finding strong { display: block; font-weight: 600; margin-bottom: 2px; }
+.finding p { color: var(--c-muted); font-size: 10px; }
+
+/* Metric grid */
+.metric-grid { display: grid; grid-template-columns: 1fr 1fr; border-bottom: var(--border); }
+.metric-cell { padding: 10px 10px 8px; border-right: var(--border); border-bottom: 0.5px solid rgba(0,0,0,.08); }
+.metric-cell:nth-child(even) { border-right: none; }
+.metric-lbl { font-size: 9px; color: var(--c-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.metric-val { font-size: 20px; font-weight: 700; line-height: 1; letter-spacing: -.02em; }
+.metric-unit { font-size: 10px; font-weight: 300; color: var(--c-muted); margin-left: 1px; }
+
+/* Compare grid */
+.compare-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: #000; }
+.compare-col { background: #fff; padding: 16px; }
+.compare-tag { font-size: 9px; font-weight: 700; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .1em; border-top: 2.5px solid; padding-top: 8px; margin-bottom: 10px; }
+.compare-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; line-height: 1.2; letter-spacing: -.02em; }
+.compare-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 11px; border-bottom: 0.5px solid rgba(0,0,0,.08); }
+.compare-row span:first-child { color: var(--c-muted); }
+.compare-row span:last-child { font-weight: 600; }
+.cg { color: #0a5c2a; } .co { color: #7a5000; } .cr { color: #7a1a0a; }
+
+/* Radar SVG */
+.ra { fill: none; stroke: #ddd; stroke-width: .7; }
+.rl { fill: none; stroke: #ddd; stroke-width: .8; }
+
+/* ─── Accessibility & SIAT modular layout ─── */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 400;
+  padding: 8px 14px;
+  background: var(--c-white);
+  border: var(--border);
+  font-family: 'Urbanist', sans-serif;
+  font-size: 12px;
+  color: var(--c-black);
+}
+.skip-link:focus {
+  left: 8px;
+  outline: 2px solid var(--c-blue);
+  outline-offset: 2px;
+}
+.tab:focus-visible,
+.lp-toggle:focus-visible,
+.rp-toggle:focus-visible,
+.cta-btn:focus-visible {
+  outline: 2px solid var(--c-blue);
+  outline-offset: 2px;
+}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/vega@5/build/vega.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5/build/vega-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6/build/vega-embed.min.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+
+<!-- ═══════════════════════════════════
+     TOPBAR — matches Figma exactly
+════════════════════════════════════ -->
+<header class="topbar">
+  <div class="tb-siat" role="note"><span class="tb-siat-line">Simon Fraser University</span><span class="tb-siat-line tb-siat-accent">School of Interactive Arts & Technology</span></div>
+  <div class="tb-logo" style="background:#fff;padding:0 12px">
+    <img src="data:image/png;base64,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" alt="D-SymBIA Logo" style="height:32px;width:auto;display:block"/>
+  </div> 
+  <div class="tb-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="10.5" cy="10.5" r="6.75"/><path d="M15.75 15.75L21 21" stroke-linecap="round"/>
+    </svg>
+    <input type="text" placeholder="Search surfaces, crops, scenarios">
+  </div>
+</header>
+<div class="topbar-line"></div>
+
+<!-- ═══════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════ -->
+<main class="main" id="main-content">
+
+  <!-- ══ HOME PAGE ══════════════════ -->
+  <div class="page active" id="pg-home">
+    <div class="layout">
+
+      <!-- Left Panel -->
+      <div class="lp" id="lp-home">
+        <div class="p-h1">Select Your Scenario!</div>
+        <div class="p-h2">Building Surfaces</div>
+        <div id="surf-list"></div>
+        <div class="p-h2">Crop Type</div>
+        <div class="p-item"><span class="p-item-dot" style="background:#1E8C5A"></span>Lettuce</div>
+        <div class="p-item"><span class="p-item-dot" style="background:#C8684A"></span>Tomatoes</div>
+        <div class="p-item"><span class="p-item-dot" style="background:#3B82D4"></span>Basil</div>
+        <div class="p-h2">BIA System (BS)</div>
+        <div class="p-item">B1- VF Hydroponic</div>
+        <div class="p-item">B2- Greenhouse</div>
+        <div class="p-item">B3- VF Soil</div>
+        <div class="p-h2">Waste Circularity (WS)</div>
+        <div class="p-item">Water</div>
+        <div class="p-item">Energy</div>
+        <div class="lp-toggle" id="lp-home-toggle" onclick="toggleLP('lp-home','lp-home-toggle')">◀</div>
+      </div>
+
+      <!-- 3D Center -->
+      <div class="center" id="vp" style="background:#F5F3EE;position:relative;overflow:hidden;flex:1;display:flex;align-items:center;justify-content:center;">
+
+  <!-- Surface tooltip -->
+  <div id="surf-tip" style="position:absolute;background:rgba(0,0,0,.88);border:0.5px solid rgba(0,0,0,.3);color:#fff;font-family:'DM Mono',monospace;font-size:10px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:20;min-width:160px;top:20px;left:20px">
+    <strong id="tip-name" style="display:block;color:#1E8C5A;font-size:11px;margin-bottom:5px">—</strong>
+    <div style="display:flex;justify-content:space-between;gap:20px;margin-top:3px"><span>Direction</span><span id="tip-dir" style="font-weight:600">—</span></div>
+    <div style="display:flex;justify-content:space-between;gap:20px;margin-top:3px"><span>Area</span><span id="tip-area" style="font-weight:600">—</span></div>
+    <div style="display:flex;justify-content:space-between;gap:20px;margin-top:3px"><span>DLI Summer</span><span id="tip-dli" style="font-weight:600">—</span></div>
+  </div>
+
+  <svg viewBox="0 0 680 480" width="100%" height="100%"
+       preserveAspectRatio="xMidYMid meet"
+       xmlns="http://www.w3.org/2000/svg"
+       style="max-width:900px;max-height:100%">
+
+    <!-- White background -->
+    <rect width="680" height="480" fill="#F5F3EE"/>
+
+    <!-- Thin grid -->
+    <defs>
+      <pattern id="g2d" width="32" height="32" patternUnits="userSpaceOnUse">
+        <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="0.5"/>
+      </pattern>
+    </defs>
+    <rect width="680" height="480" fill="url(#g2d)"/>
+
+    <!-- Ground line -->
+    <line x1="40" y1="400" x2="640" y2="400" stroke="#000" stroke-width="0.5" opacity="0.3"/>
+
+    <!-- ── BUILDING A — main block, South facade HIGH DLI ── -->
+    <!-- Body -->
+    <rect x="210" y="160" width="200" height="240" fill="#fff" stroke="#000" stroke-width="0.8"/>
+    <!-- South DLI strip -->
+    <rect x="210" y="160" width="200" height="6" fill="#1E8C5A" opacity="0.8"/>
+    <!-- Windows -->
+    <rect x="222" y="175" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.5"/>
+    <rect x="252" y="175" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.5"/>
+    <rect x="282" y="175" width="22" height="28" fill="none" stroke="#DBA830" stroke-width="0.8" opacity="0.5"/>
+    <rect x="312" y="175" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.5"/>
+    <rect x="342" y="175" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.5"/>
+    <rect x="372" y="175" width="22" height="28" fill="none" stroke="#DBA830" stroke-width="0.8" opacity="0.5"/>
+    <rect x="222" y="214" width="22" height="28" fill="none" stroke="#DBA830" stroke-width="0.8" opacity="0.4"/>
+    <rect x="252" y="214" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.4"/>
+    <rect x="282" y="214" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.4"/>
+    <rect x="312" y="214" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.4"/>
+    <rect x="342" y="214" width="22" height="28" fill="none" stroke="#DBA830" stroke-width="0.8" opacity="0.4"/>
+    <rect x="372" y="214" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.4"/>
+    <rect x="222" y="253" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.35"/>
+    <rect x="252" y="253" width="22" height="28" fill="none" stroke="#DBA830" stroke-width="0.8" opacity="0.35"/>
+    <rect x="282" y="253" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.35"/>
+    <rect x="312" y="253" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.35"/>
+    <rect x="342" y="253" width="22" height="28" fill="none" stroke="#B83020" stroke-width="0.8" opacity="0.35"/>
+    <rect x="372" y="253" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.35"/>
+    <rect x="222" y="292" width="22" height="28" fill="none" stroke="#DBA830" stroke-width="0.8" opacity="0.3"/>
+    <rect x="252" y="292" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.3"/>
+    <rect x="282" y="292" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.3"/>
+    <rect x="312" y="292" width="22" height="28" fill="none" stroke="#DBA830" stroke-width="0.8" opacity="0.3"/>
+    <rect x="342" y="292" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.3"/>
+    <rect x="372" y="292" width="22" height="28" fill="none" stroke="#1E8C5A" stroke-width="0.8" opacity="0.3"/>
+    <!-- Rooftop greenhouse -->
+    <rect x="230" y="140" width="160" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.8" stroke-dasharray="4,2"/>
+    <text x="310" y="155" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#1E8C5A" opacity="0.8">Rooftop · High DLI</text>
+    <!-- Label A -->
+    <text x="310" y="380" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#000" opacity="0.5">Building A · South</text>
+
+    <!-- ── BUILDING B — left tower, MEDIUM DLI amber ── -->
+    <rect x="80" y="200" width="100" height="200" fill="#fff" stroke="#000" stroke-width="0.8"/>
+    <rect x="80" y="200" width="100" height="6" fill="#DBA830" opacity="0.8"/>
+    <rect x="90" y="215" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.5"/>
+    <rect x="112" y="215" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.4"/>
+    <rect x="134" y="215" width="16" height="20" fill="none" stroke="#B83020" stroke-width="0.7" opacity="0.4"/>
+    <rect x="156" y="215" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.4"/>
+    <rect x="90" y="244" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.4"/>
+    <rect x="112" y="244" width="16" height="20" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.35"/>
+    <rect x="134" y="244" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.35"/>
+    <rect x="156" y="244" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.35"/>
+    <rect x="90" y="273" width="16" height="20" fill="none" stroke="#B83020" stroke-width="0.7" opacity="0.3"/>
+    <rect x="112" y="273" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.3"/>
+    <rect x="134" y="273" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.3"/>
+    <rect x="156" y="273" width="16" height="20" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.3"/>
+    <rect x="90" y="302" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.25"/>
+    <rect x="112" y="302" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.25"/>
+    <rect x="134" y="302" width="16" height="20" fill="none" stroke="#B83020" stroke-width="0.7" opacity="0.25"/>
+    <rect x="156" y="302" width="16" height="20" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.25"/>
+    <text x="130" y="380" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#000" opacity="0.5">B · East</text>
+
+    <!-- ── BUILDING C — right, HIGH DLI green ── -->
+    <rect x="440" y="230" width="120" height="170" fill="#fff" stroke="#000" stroke-width="0.8"/>
+    <rect x="440" y="230" width="120" height="6" fill="#1E8C5A" opacity="0.8"/>
+    <rect x="450" y="245" width="18" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.5"/>
+    <rect x="474" y="245" width="18" height="22" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.4"/>
+    <rect x="498" y="245" width="18" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.4"/>
+    <rect x="522" y="245" width="18" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.4"/>
+    <rect x="546" y="245" width="8" height="22" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.4"/>
+    <rect x="450" y="276" width="18" height="22" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.35"/>
+    <rect x="474" y="276" width="18" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.35"/>
+    <rect x="498" y="276" width="18" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.35"/>
+    <rect x="522" y="276" width="18" height="22" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.35"/>
+    <rect x="546" y="276" width="8" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.35"/>
+    <rect x="450" y="307" width="18" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.3"/>
+    <rect x="474" y="307" width="18" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.3"/>
+    <rect x="498" y="307" width="18" height="22" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.3"/>
+    <rect x="522" y="307" width="18" height="22" fill="none" stroke="#1E8C5A" stroke-width="0.7" opacity="0.3"/>
+    <rect x="546" y="307" width="8" height="22" fill="none" stroke="#B83020" stroke-width="0.7" opacity="0.25"/>
+    <!-- Rooftop GH -->
+    <rect x="452" y="212" width="96" height="20" fill="none" stroke="#1E8C5A" stroke-width="0.7" stroke-dasharray="4,2"/>
+    <text x="500" y="225" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#1E8C5A" opacity="0.8">Rooftop · High DLI</text>
+    <text x="500" y="380" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#000" opacity="0.5">Building C · South</text>
+
+    <!-- ── BUILDING D — far right, LOW DLI ── -->
+    <rect x="572" y="300" width="65" height="100" fill="#fff" stroke="#000" stroke-width="0.8"/>
+    <rect x="572" y="300" width="65" height="5" fill="#B83020" opacity="0.7"/>
+    <rect x="580" y="313" width="12" height="15" fill="none" stroke="#B83020" stroke-width="0.7" opacity="0.4"/>
+    <rect x="598" y="313" width="12" height="15" fill="none" stroke="#B83020" stroke-width="0.7" opacity="0.35"/>
+    <rect x="616" y="313" width="12" height="15" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.3"/>
+    <rect x="580" y="334" width="12" height="15" fill="none" stroke="#B83020" stroke-width="0.7" opacity="0.3"/>
+    <rect x="598" y="334" width="12" height="15" fill="none" stroke="#DBA830" stroke-width="0.7" opacity="0.25"/>
+    <rect x="616" y="334" width="12" height="15" fill="none" stroke="#B83020" stroke-width="0.7" opacity="0.25"/>
+    <text x="604" y="380" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#000" opacity="0.5">D · North</text>
+
+    <!-- ── DLI LEGEND ── -->
+    <rect x="40" y="30" width="160" height="88" fill="#fff" stroke="#000" stroke-width="0.5"/>
+    <text x="52" y="48" font-family="Urbanist,sans-serif" font-size="10" fill="#000" font-weight="600">DLI Suitability</text>
+    <line x1="40" y1="54" x2="200" y2="54" stroke="#000" stroke-width="0.3" opacity="0.3"/>
+    <rect x="52" y="61" width="10" height="10" fill="#1E8C5A"/>
+    <text x="66" y="71" font-family="DM Mono,monospace" font-size="9" fill="#000">High ≥19 mol/m²/d</text>
+    <rect x="52" y="78" width="10" height="10" fill="#DBA830"/>
+    <text x="66" y="88" font-family="DM Mono,monospace" font-size="9" fill="#000">Medium 10–18</text>
+    <rect x="52" y="95" width="10" height="10" fill="#B83020"/>
+    <text x="66" y="105" font-family="DM Mono,monospace" font-size="9" fill="#000">Low ≤9 mol/m²/d</text>
+
+    <!-- ── BIA INDICATORS ── -->
+    <!-- Rooftop greenhouse dashed box label -->
+    <text x="40" y="140" font-family="DM Mono,monospace" font-size="8" fill="#1E8C5A" opacity="0.7">- - -  Rooftop BIA Zone</text>
+
+    <!-- ── COMPASS ── -->
+    <g transform="translate(620,50)">
+      <circle cx="0" cy="0" r="22" fill="#fff" stroke="#000" stroke-width="0.5"/>
+      <text x="0" y="-10" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#000" font-weight="bold">N</text>
+      <text x="0" y="16" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#000" opacity="0.5">S</text>
+      <text x="-14" y="4" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#000" opacity="0.5">W</text>
+      <text x="14" y="4" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#000" opacity="0.5">E</text>
+      <line x1="0" y1="-8" x2="0" y2="0" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
+      <polygon points="0,-18 3,-8 -3,-8" fill="#000"/>
+    </g>
+
+    <!-- ── HINT ── -->
+    <text x="340" y="430" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#000" opacity="0.35">← Select a surface from the left panel to explore DLI data</text>
+
+    <!-- ── SCALE BAR ── -->
+    <line x1="80" y1="415" x2="180" y2="415" stroke="#000" stroke-width="0.8" opacity="0.4"/>
+    <line x1="80" y1="410" x2="80" y2="420" stroke="#000" stroke-width="0.8" opacity="0.4"/>
+    <line x1="180" y1="410" x2="180" y2="420" stroke="#000" stroke-width="0.8" opacity="0.4"/>
+    <text x="130" y="428" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="#000" opacity="0.4">~50 m</text>
+
+  </svg>
+</div>
+
+      <!-- Right Panel — Figma exact structure -->
+      <div class="rp" id="rp-home">
+        <div class="rp-toggle" id="rp-home-toggle" onclick="toggleRP('rp-home','rp-home-toggle')">▶</div>
+        <div id="rp-home-content">
+          <div class="rp-h2" id="rp-title">Surface 1</div>
+          <div class="rp-line"></div>
+          <div class="rp-eyebrow" id="rp-sub" style="padding:4px 8px;border-bottom:var(--border)">S1 — South Façade · 120 m² · Outdoor · LS1</div>
+          <div class="rp-line"></div>
+
+          <!-- Meta row: Area / BIA Ratio / Struct. Cap / Orientation -->
+          <div class="meta-row">
+            <div class="meta-cell"><div class="lbl">Area</div><div class="val" id="rp-area">120 m²</div></div>
+            <div class="meta-cell"><div class="lbl">BIA Ratio</div><div class="val" id="rp-ratio">50%</div></div>
+            <div class="meta-cell"><div class="lbl">Struct. Cap.</div><div class="val" id="rp-struct">80 kg/m²</div></div>
+            <div class="meta-cell"><div class="lbl">Orientation</div><div class="val" id="rp-orient">South · Vertical</div></div>
+          </div>
+
+          <div class="rp-h3">DLI Seasonal Strip</div>
+          <!-- DLI table header -->
+          <div class="meta-row">
+            <div class="meta-cell"><div class="lbl">SPR</div></div>
+            <div class="meta-cell"><div class="lbl">SUM</div></div>
+            <div class="meta-cell"><div class="lbl">FAL</div></div>
+            <div class="meta-cell"><div class="lbl">WIN</div></div>
+          </div>
+          <div class="meta-row" id="rp-dli-vals">
+            <div class="meta-cell dli-md"><div class="val">22</div></div>
+            <div class="meta-cell dli-hi"><div class="val">35</div></div>
+            <div class="meta-cell dli-md"><div class="val">18</div></div>
+            <div class="meta-cell dli-lo"><div class="val">8</div></div>
+          </div>
+
+          <!-- Warning -->
+          <div class="warn" id="rp-warn">
+            <div class="wt">⚠ Winter DLI Deficit</div>
+            <div class="ws" id="rp-warn-text">8 mol/m²/day — below crop minimums (10–11). Supplemental lighting needed Nov–Feb.</div>
+          </div>
+
+          <div class="rp-h3">BIA Compatibility</div>
+          <div class="compat-row"><span>Lettuce</span><span style="color:#0a5c2a;font-weight:600">✓ Very High</span></div>
+          <div class="compat-row"><span>Basil</span><span style="color:#0a5c2a;font-weight:600">✓ High</span></div>
+          <div class="compat-row"><span>Tomato</span><span style="color:#7a5000;font-weight:600">~ Medium</span></div>
+
+          <div class="cta-row">
+            <button class="cta-btn cta-sec" onclick="switchTab('ls')">
+              EXPLORE LOCATION SCENARIOS
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 17L17 7M17 7H7M17 7v10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="cta-btn cta-pri" onclick="switchTab('compare')">
+              COMPARE ALL SCENARIOS
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M7 17L17 7M17 7H7M17 7v10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LOCATION PAGE ══════════════ -->
+  <div class="page" id="pg-ls">
+    <div class="layout">
+      <div class="lp" id="lp-ls">
+        <div class="p-h1">Location Scenarios</div>
+        <div style="font-size:9px;color:var(--c-muted);padding:5px 8px;border-bottom:var(--border);font-family:'DM Mono',monospace">49 surfaces · 15 scenario sets · Real data</div>
+        <div class="p-h2">Scenario Sets (LS1–LS15)</div>
+        <div id="ls-list-panel"></div>
+        <button onclick="switchTab('home')" style="display:inline-flex;align-items:center;gap:7px;border:0.5px solid #000;background:#fff;padding:7px 14px;font-family:'Urbanist',sans-serif;font-size:12px;font-weight:500;cursor:pointer;margin:12px 0 0 12px;letter-spacing:-.01em" onmouseover="this.style.background='#f5f3ee'" onmouseout="this.style.background='#fff'">&#8592; Home</button>
+        <div class="lp-toggle" id="lp-ls-toggle" onclick="toggleLP('lp-ls','lp-ls-toggle')">◀</div>
+      </div>
+      <div class="center-scroll">
+        <div class="chart-section">
+          <div class="chart-h2">DLI Heatmap — Top 20 Surfaces</div>
+          <div class="chart-sub">Vega-Lite · mol PAR/m²/day · Location_Database.csv · Sorted by summer DLI</div>
+          <div id="vl-heatmap" class="vl-chart"></div>
+        </div>
+        <div class="chart-section">
+          <div class="chart-h2">Surface Area by Direction</div>
+          <div class="chart-sub">Vega-Lite bar · m² total · All 49 surfaces grouped by orientation</div>
+          <div id="vl-area-bar" class="vl-chart"></div>
+        </div>
+        <div class="chart-section">
+          <div class="chart-h2">DLI Range by Season</div>
+          <div class="chart-sub">Vega-Lite boxplot · All 49 surfaces · Min / median / max</div>
+          <div id="vl-boxplot" class="vl-chart"></div>
+        </div>
+      </div>
+      <div class="rp" id="rp-ls">
+        <div class="rp-toggle" id="rp-ls-toggle" onclick="toggleRP('rp-ls','rp-ls-toggle')">▶</div>
+        <div class="rp-h2" style="border-bottom:2.5px solid var(--c-blue)">Key Findings</div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-amber)"></div><div><strong>Winter DLI Critical</strong><p>Most East/North surfaces fall below 6 mol. Only South-facing viable year-round.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-green)"></div><div><strong>Best Façade: S8 South</strong><p>229m² · DLI summer 22.4 — highest south-facing vertical surface.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-green)"></div><div><strong>Best Rooftop: S41 Horizontal</strong><p>742m² · DLI summer 42.8 — largest area & highest DLI in dataset.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-red)"></div><div><strong>North Faces Unsuitable</strong><p>7 surfaces: summer DLI 0.4–8.4. Below all crop minimums.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-blue)"></div><div><strong>LS1 Best Scenario</strong><p>Surfaces 32,33,34,40,41 — all horizontal. Avg DLI summer 22.9 mol.</p></div></div>
+        <div class="rp-h2" style="border-top:var(--border)">Dataset Summary</div>
+        <div id="ls-top-bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CROP PAGE ══════════════════ -->
+  <div class="page" id="pg-cs">
+    <div class="layout">
+      <div class="lp" id="lp-cs">
+        <div class="p-h1">Crop Scenarios</div>
+        <div style="font-size:9px;color:var(--c-muted);padding:5px 8px;border-bottom:var(--border);font-family:'DM Mono',monospace">15 scenario sets · Crop_Scenarios.csv</div>
+        <div class="p-h2">Crops in CS1</div>
+        <div class="p-item active"><span class="p-item-dot" style="background:var(--c-green)"></span><div>🥬 Lettuce<div class="p-item-sub">25 kg/m² · 45d · min 10 mol DLI</div></div></div>
+        <div class="p-item"><span class="p-item-dot" style="background:var(--c-terra)"></span><div>🌿 Basil<div class="p-item-sub">18 kg/m² · 60d · min 11 mol DLI</div></div></div>
+        <div class="p-item" style="opacity:.65"><span class="p-item-dot" style="background:var(--c-amber)"></span><div>🍅 Tomato<div class="p-item-sub">Medium compat.</div></div></div>
+        <div class="p-h2">BIA Compatibility</div>
+        <div class="p-item" style="justify-content:space-between">Greenhouse (B2)<span style="color:var(--c-green);font-weight:600">✓ Very High</span></div>
+        <div class="p-item" style="justify-content:space-between">VF Hydroponic<span style="color:var(--c-red);font-weight:600">✗ Low</span></div>
+        <div class="p-item" style="justify-content:space-between">Soil-Based<span style="color:var(--c-green);font-weight:600">✓ High</span></div>
+        <div class="p-h2">Scenario Sets</div>
+        <div id="cs-list-panel"></div>
+        <button onclick="switchTab('home')" style="display:inline-flex;align-items:center;gap:7px;border:0.5px solid #000;background:#fff;padding:7px 14px;font-family:'Urbanist',sans-serif;font-size:12px;font-weight:500;cursor:pointer;margin:12px 0 0 12px;letter-spacing:-.01em" onmouseover="this.style.background='#f5f3ee'" onmouseout="this.style.background='#fff'">&#8592; Home</button>
+        <div class="lp-toggle" id="lp-cs-toggle" onclick="toggleLP('lp-cs','lp-cs-toggle')">◀</div>
+      </div>
+      <div class="center-scroll">
+        <div class="chart-section">
+          <div class="chart-h2">Multi-Attribute Comparison — CS1</div>
+          <div class="chart-sub">Radar · Yield · Water · GHG · Speed · BC Market value</div>
+          <div style="display:flex;justify-content:center;padding:8px 0">
+            <svg width="290" height="270" viewBox="0 0 290 270">
+              <ellipse cx="145" cy="130" rx="90" ry="90" class="ra"/>
+              <ellipse cx="145" cy="130" rx="60" ry="60" class="ra"/>
+              <ellipse cx="145" cy="130" rx="30" ry="30" class="ra"/>
+              <line x1="145" y1="40" x2="145" y2="220" class="rl"/>
+              <line x1="59" y1="87" x2="231" y2="173" class="rl"/>
+              <line x1="59" y1="173" x2="231" y2="87" class="rl"/>
+              <line x1="55" y1="130" x2="235" y2="130" class="rl"/>
+              <line x1="97" y1="43" x2="193" y2="217" class="rl"/>
+              <polygon points="145,50 223,98 206,185 84,185 67,98" fill="rgba(30,140,90,.2)" stroke="#1E8C5A" stroke-width="1.5"/>
+              <polygon points="145,70 213,110 198,180 92,180 77,110" fill="rgba(219,168,48,.18)" stroke="#DBA830" stroke-width="1.5"/>
+              <text x="145" y="28" text-anchor="middle" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Yield</text>
+              <text x="248" y="89" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Water</text>
+              <text x="205" y="208" text-anchor="middle" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Low GHG</text>
+              <text x="85" y="208" text-anchor="middle" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Speed</text>
+              <text x="20" y="89" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Market</text>
+              <rect x="30" y="248" width="9" height="9" fill="#1E8C5A" opacity=".8"/>
+              <text x="43" y="257" font-size="11" fill="#333" font-family="Urbanist,sans-serif">Lettuce</text>
+              <rect x="115" y="248" width="9" height="9" fill="#DBA830" opacity=".8"/>
+              <text x="128" y="257" font-size="11" fill="#333" font-family="Urbanist,sans-serif">Basil</text>
+            </svg>
+          </div>
+        </div>
+        <div class="chart-section">
+          <div class="chart-h2">DLI Supply vs Crop Requirement — South Surfaces</div>
+          <div class="chart-sub">Vega-Lite grouped bar · Dashed line = 12 mol minimum · Real CSV data</div>
+          <div id="vl-dli-supply" class="vl-chart"></div>
+        </div>
+        <div class="chart-section">
+          <div class="chart-h2">Crop Parameters — CS1</div>
+          <div class="chart-sub">Vega-Lite horizontal bar · Side-by-side comparison</div>
+          <div id="vl-crop-compare" class="vl-chart"></div>
+        </div>
+      </div>
+      <div class="rp" id="rp-cs">
+        <div class="rp-toggle" id="rp-cs-toggle" onclick="toggleRP('rp-cs','rp-cs-toggle')">▶</div>
+        <div class="rp-h2" style="border-bottom:2.5px solid var(--c-green)">Crop Parameters</div>
+        <table class="data-table">
+          <thead><tr><th>Parameter</th><th>Lettuce</th><th>Basil</th></tr></thead>
+          <tbody>
+            <tr><td class="row-lbl">Yield (kg/m²)</td><td>25</td><td>18</td></tr>
+            <tr><td class="row-lbl">Water (L/kg)</td><td>20</td><td>25</td></tr>
+            <tr><td class="row-lbl">GHG (kgCO₂/kg)</td><td>1.2</td><td>1.5</td></tr>
+            <tr><td class="row-lbl">Cycle (days)</td><td>45</td><td>60</td></tr>
+            <tr><td class="row-lbl">BC Market ($/kg)</td><td>4.2</td><td>8.5</td></tr>
+            <tr><td class="row-lbl">DLI min (mol)</td><td>10</td><td>11</td></tr>
+            <tr><td class="row-lbl">GH Compat.</td><td class="compat-H">High</td><td class="compat-H">High</td></tr>
+          </tbody>
+        </table>
+        <div class="rp-h2" style="border-top:var(--border)">Key Findings</div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-green)"></div><div><strong>Lettuce: Best Yield & Speed</strong><p>25 kg/m², 45-day cycle — highest throughput.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-amber)"></div><div><strong>Basil: 2× Market Value</strong><p>$8.5/kg BC vs $4.2 — premium urban crop.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-blue)"></div><div><strong>3 Seasons Viable</strong><p>Spring/Summer/Fall exceed DLI minimums on South surfaces.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-red)"></div><div><strong>Winter Deficit Universal</strong><p>All LS1 surfaces below 10 mol. Nov–Feb lighting needed.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BIA SYSTEM PAGE ════════════ -->
+  <div class="page" id="pg-bs">
+    <div class="layout">
+      <div class="lp" id="lp-bs">
+        <div class="p-h1">BIA Systems</div>
+        <div class="p-h2">Systems in BS1</div>
+        <div class="p-item active" style="flex-direction:column;align-items:flex-start;gap:2px"><strong style="font-size:12px">B1 — VF Hydroponic</strong><div class="p-item-sub">Façade · HVAC: High · 12 kW/100m²</div></div>
+        <div class="p-item" style="flex-direction:column;align-items:flex-start;gap:2px"><strong style="font-size:12px">B2 — Greenhouse</strong><div class="p-item-sub">Rooftop · HVAC: Low · 10 kW/100m²</div></div>
+        <div class="p-item" style="flex-direction:column;align-items:flex-start;gap:2px"><strong style="font-size:12px">B3 — VF Soil Indoor</strong><div class="p-item-sub">Indoor · HVAC: V.High · 14 kW/100m²</div></div>
+        <div style="margin:8px;padding:8px;border:0.5px solid var(--c-amber);background:#fffbf0;font-size:10px"><strong style="color:var(--c-amber);display:block;margin-bottom:3px">⚠ B3 Missing Params</strong>H_min, H_max, STR_W not populated.</div>
+        <button onclick="switchTab('home')" style="display:inline-flex;align-items:center;gap:7px;border:0.5px solid #000;background:#fff;padding:7px 14px;font-family:'Urbanist',sans-serif;font-size:12px;font-weight:500;cursor:pointer;margin:12px 0 0 12px;letter-spacing:-.01em" onmouseover="this.style.background='#f5f3ee'" onmouseout="this.style.background='#fff'">&#8592; Home</button>
+        <div class="lp-toggle" id="lp-bs-toggle" onclick="toggleLP('lp-bs','lp-bs-toggle')">◀</div>
+      </div>
+      <div class="center-scroll">
+        <div class="chart-section">
+          <div class="chart-h2">Operational Requirements — BS1</div>
+          <div class="chart-sub">Electrical Load (kW/100m²) · Structural Weight (kg/m²)</div>
+          <div style="margin-top:6px">
+            <div style="font-size:11px;font-weight:600;color:var(--c-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Electrical Load</div>
+            <div class="bar-wrap"><div class="bar-meta"><span>B1 VF Hydroponic</span><span>12 kW</span></div><div class="bar-bg"><div class="bar-fill" style="width:86%;background:var(--c-amber)">12</div></div></div>
+            <div class="bar-wrap"><div class="bar-meta"><span>B2 Greenhouse</span><span>10 kW</span></div><div class="bar-bg"><div class="bar-fill" style="width:71%;background:var(--c-green)">10</div></div></div>
+            <div class="bar-wrap"><div class="bar-meta"><span>B3 VF Soil</span><span>14 kW</span></div><div class="bar-bg"><div class="bar-fill" style="width:100%;background:var(--c-blue)">14</div></div></div>
+            <div style="font-size:11px;font-weight:600;color:var(--c-muted);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px">Structural Weight (kg/m²)</div>
+            <div class="bar-wrap"><div class="bar-meta"><span>B1</span><span>60</span></div><div class="bar-bg"><div class="bar-fill" style="width:100%;background:var(--c-amber)">60</div></div></div>
+            <div class="bar-wrap"><div class="bar-meta"><span>B2</span><span>55</span></div><div class="bar-bg"><div class="bar-fill" style="width:92%;background:var(--c-green)">55</div></div></div>
+            <div class="bar-wrap"><div class="bar-meta"><span>B3</span><span>— (missing)</span></div><div class="bar-bg"><div class="bar-fill" style="width:6%;background:#bbb">—</div></div></div>
+          </div>
+        </div>
+        <div class="chart-section">
+          <div class="chart-h2">BS1 × CS1 — Compatibility Matrix</div>
+          <div class="chart-sub">% match based on DLI, HVAC, and structural requirements</div>
+          <table class="data-table" style="margin-top:8px">
+            <thead><tr><th>System</th><th>🥬 Lettuce</th><th>🌿 Basil</th></tr></thead>
+            <tbody>
+              <tr><td class="row-lbl">B1 VF Hydroponic</td><td class="compat-H">90%</td><td class="compat-H">80%</td></tr>
+              <tr><td class="row-lbl">B2 Greenhouse</td><td class="compat-H">80%</td><td class="compat-H">85%</td></tr>
+              <tr><td class="row-lbl">B3 VF Soil</td><td class="compat-M">60%</td><td class="compat-M">55%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="rp" id="rp-bs">
+        <div class="rp-toggle" id="rp-bs-toggle" onclick="toggleRP('rp-bs','rp-bs-toggle')">▶</div>
+        <div class="rp-h2" style="border-bottom:2.5px solid var(--c-amber)">Technical Parameters</div>
+        <table class="data-table">
+          <thead><tr><th></th><th>B1 VF</th><th>B2 GH</th><th>B3 VF</th></tr></thead>
+          <tbody>
+            <tr><td class="row-lbl">Type</td><td>Hydro.</td><td>Soil</td><td>Soil</td></tr>
+            <tr><td class="row-lbl">Install</td><td>Façade</td><td>Rooftop</td><td>Indoor</td></tr>
+            <tr><td class="row-lbl">Elec (kW)</td><td>12</td><td class="compat-H">10</td><td class="compat-L">14</td></tr>
+            <tr><td class="row-lbl">Water (L)</td><td>5</td><td>5</td><td>4</td></tr>
+            <tr><td class="row-lbl">HVAC</td><td>High</td><td class="compat-H">Low</td><td class="compat-L">V.High</td></tr>
+            <tr><td class="row-lbl">Struct.</td><td>60</td><td class="compat-H">55</td><td class="compat-L">—</td></tr>
+          </tbody>
+        </table>
+        <div class="rp-h2" style="border-top:var(--border)">Key Findings</div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-green)"></div><div><strong>B2 Most Efficient</strong><p>Low HVAC, leverages natural light. Ideal for rooftop S41 (742m²).</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-red)"></div><div><strong>B3 Highest Demand</strong><p>Very High HVAC — 14 kW/100m². Full climate control.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-amber)"></div><div><strong>B3 Data Gaps</strong><p>H_min, H_max, STR_W missing from dataset.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-green)"></div><div><strong>B1 & B2 Both 80%+</strong><p>Strong match for CS1 crops on LS1 surfaces.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WASTE PAGE ══════════════════ -->
+  <div class="page" id="pg-ws">
+    <div class="layout">
+      <div class="lp" id="lp-ws">
+        <div class="p-h1">Waste Scenarios</div>
+        <div class="p-h2">Resource Streams — WS1</div>
+        <div style="padding:10px 8px;border-bottom:var(--border);border-left:2.5px solid var(--c-blue)">
+          <div style="font-size:12px;font-weight:600;color:var(--c-blue);margin-bottom:3px">💧 Water — Grey water</div>
+          <div style="font-size:18px;font-weight:700;letter-spacing:-.02em">40,000 L</div>
+          <div style="font-size:9px;color:var(--c-muted);font-family:'DM Mono',monospace;margin:2px 0">per year · Membrane + UV</div>
+          <div style="font-size:13px;font-weight:700;color:var(--c-blue)">80% → BIA</div>
+        </div>
+        <div style="padding:10px 8px;border-bottom:var(--border);border-left:2.5px solid var(--c-terra)">
+          <div style="font-size:12px;font-weight:600;color:var(--c-terra);margin-bottom:3px">🔥 Energy — HVAC</div>
+          <div style="font-size:18px;font-weight:700;letter-spacing:-.02em">15,000 kWh</div>
+          <div style="font-size:9px;color:var(--c-muted);font-family:'DM Mono',monospace;margin:2px 0">per year · Heat Exchanger</div>
+          <div style="font-size:13px;font-weight:700;color:var(--c-terra)">70% → BIA</div>
+        </div>
+        <div class="p-h2">Notes</div>
+        <div style="padding:8px;font-size:10px;color:var(--c-muted);font-family:'DM Mono',monospace;line-height:1.8">· 2 streams in WS1<br>· Organics + CO₂ planned<br>· Scenario estimates only</div>
+        <button onclick="switchTab('home')" style="display:inline-flex;align-items:center;gap:7px;border:0.5px solid #000;background:#fff;padding:7px 14px;font-family:'Urbanist',sans-serif;font-size:12px;font-weight:500;cursor:pointer;margin:12px 0 0 12px;letter-spacing:-.01em" onmouseover="this.style.background='#f5f3ee'" onmouseout="this.style.background='#fff'">&#8592; Home</button>
+        <div class="lp-toggle" id="lp-ws-toggle" onclick="toggleLP('lp-ws','lp-ws-toggle')">◀</div>
+      </div>
+      <div class="center-scroll">
+        <div class="chart-section">
+          <div class="chart-h2">Resource Flow — WS1 → BS1 → CS1</div>
+          <div class="chart-sub">Sankey-style flow diagram · Two recovered resource streams</div>
+          <div style="margin-top:10px">
+            <div style="font-size:11px;font-weight:600;color:var(--c-blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-family:'DM Mono',monospace">💧 Water Stream</div>
+            <div class="flow-wrap">
+              <div class="flow-node" style="border-color:var(--c-blue)"><strong>Grey Water</strong>50,000 L raw</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node"><strong>Filtration</strong>Membrane+UV</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" style="border-color:var(--c-blue);background:#f0f7ff"><strong>40,000 L</strong>80% to BIA</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" style="border-color:var(--c-green);background:#f0fff7"><strong>BS1</strong>32,000 L</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" style="border-color:var(--c-green)"><strong>CS1 ✓</strong></div>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:var(--c-terra);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;font-family:'DM Mono',monospace">🔥 Energy Stream</div>
+            <div class="flow-wrap">
+              <div class="flow-node" style="border-color:var(--c-terra)"><strong>HVAC Exhaust</strong>22,000 kWh</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node"><strong>Heat Exc.</strong>Plate</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" style="border-color:var(--c-terra);background:#fff7f0"><strong>15,000 kWh</strong>70% to BIA</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" style="border-color:var(--c-green);background:#f0fff7"><strong>BS1</strong>10,500 kWh</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node" style="border-color:var(--c-green)"><strong>Climate ✓</strong></div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-section">
+          <div class="chart-h2">Resource Usage Distribution</div>
+          <div class="chart-sub">Allocation of recovered resources to BIA vs other uses</div>
+          <div style="margin-top:8px">
+            <div class="bar-wrap"><div class="bar-meta"><span style="font-weight:600">Water · 40,000 L recovered</span></div><div class="bar-bg" style="height:26px"><div class="bar-fill" style="width:80%;background:var(--c-blue);font-size:10px">80% → BIA (32,000 L)</div></div><div style="font-size:10px;color:var(--c-muted);font-family:'DM Mono',monospace;margin-top:3px">20% (8,000 L) → other</div></div>
+            <div class="bar-wrap" style="margin-top:14px"><div class="bar-meta"><span style="font-weight:600">Heat · 15,000 kWh recovered</span></div><div class="bar-bg" style="height:26px"><div class="bar-fill" style="width:70%;background:var(--c-terra);font-size:10px">70% → BIA (10,500 kWh)</div></div><div style="font-size:10px;color:var(--c-muted);font-family:'DM Mono',monospace;margin-top:3px">30% (4,500 kWh) → HVAC loop</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="rp" id="rp-ws">
+        <div class="rp-toggle" id="rp-ws-toggle" onclick="toggleRP('rp-ws','rp-ws-toggle')">▶</div>
+        <div class="rp-h2" style="border-bottom:2.5px solid var(--c-terra)">Summary KPIs</div>
+        <div class="metric-grid">
+          <div class="metric-cell"><div class="metric-lbl">Water</div><div class="metric-val" style="color:var(--c-blue);font-size:18px">40k<span class="metric-unit">L/yr</span></div></div>
+          <div class="metric-cell"><div class="metric-lbl">→ BIA</div><div class="metric-val" style="color:var(--c-blue)">80<span class="metric-unit">%</span></div></div>
+          <div class="metric-cell"><div class="metric-lbl">Heat</div><div class="metric-val" style="color:var(--c-terra);font-size:16px">15k<span class="metric-unit">kWh</span></div></div>
+          <div class="metric-cell"><div class="metric-lbl">→ BIA</div><div class="metric-val" style="color:var(--c-terra)">70<span class="metric-unit">%</span></div></div>
+          <div class="metric-cell"><div class="metric-lbl">Streams</div><div class="metric-val">2</div></div>
+          <div class="metric-cell"><div class="metric-lbl">Treatment</div><div class="metric-val">2</div></div>
+        </div>
+        <div class="rp-h2" style="border-top:var(--border)">Key Findings</div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-blue)"></div><div><strong>Grey Water Dominant</strong><p>40,000 L/yr enables consistent year-round irrigation for BS1.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-terra)"></div><div><strong>HVAC Heat Critical</strong><p>10,500 kWh reduces external heating demand significantly.</p></div></div>
+        <div class="finding"><div class="finding-dot" style="background:var(--c-muted)"></div><div><strong>Estimates Only</strong><p>Current quantities are scenario-based. Real BMS data planned.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COMPARE PAGE ════════════════ -->
+  <div class="page" id="pg-compare">
+    <div style="overflow-y:auto;width:100%;height:100%;padding:20px;background:rgba(229,229,229,0.5)">
+<button onclick="switchTab('home')" style="display:inline-flex;align-items:center;gap:7px;border:0.5px solid #000;background:#fff;padding:7px 14px;font-family:'Urbanist',sans-serif;font-size:12px;font-weight:500;cursor:pointer;margin:12px 0 0 12px;letter-spacing:-.01em" onmouseover="this.style.background='#f5f3ee'" onmouseout="this.style.background='#fff'">&#8592; Home</button>
+      <div style="font-size:28px;font-weight:600;margin-bottom:4px;letter-spacing:-.02em">Scenario Comparison</div>
+      <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--c-muted);margin-bottom:16px">LS1 · CS1 · BS1 · WS1 — complete side-by-side</div>
+      <div class="compare-grid">
+        <div class="compare-col">
+          <div class="compare-tag" style="color:var(--c-blue);border-top-color:var(--c-blue)">LS — Location</div>
+          <div class="compare-title">Location<br>Scenario 1</div>
+          <div class="compare-row"><span>Total Surfaces</span><span>49</span></div>
+          <div class="compare-row"><span>Best DLI Summer</span><span class="cg">42.8 mol (S41)</span></div>
+          <div class="compare-row"><span>Best Orient.</span><span>South / Horiz.</span></div>
+          <div class="compare-row"><span>Winter DLI</span><span class="cr">1–11 mol ⚠</span></div>
+          <div class="compare-row"><span>Best Façade</span><span>S8 · 229m²</span></div>
+          <div class="compare-row"><span>Best Rooftop</span><span>S41 · 742m²</span></div>
+          <div class="compare-row"><span>Status</span><span class="cg">Active ✓</span></div>
+        </div>
+        <div class="compare-col">
+          <div class="compare-tag" style="color:var(--c-green);border-top-color:var(--c-green)">CS — Crop</div>
+          <div class="compare-title">Crop<br>Scenario 1</div>
+          <div class="compare-row"><span>Crops</span><span class="cg">Lettuce · Basil</span></div>
+          <div class="compare-row"><span>Lettuce Yield</span><span class="cg">25 kg/m²</span></div>
+          <div class="compare-row"><span>Basil Market</span><span class="cg">$8.5/kg BC</span></div>
+          <div class="compare-row"><span>Min DLI Req.</span><span class="co">10–11 mol</span></div>
+          <div class="compare-row"><span>GH Compat.</span><span class="cg">High ✓</span></div>
+          <div class="compare-row"><span>Viable Seasons</span><span class="co">3 of 4 ⚠</span></div>
+          <div class="compare-row"><span>Winter Lighting</span><span class="cr">Needed ⚠</span></div>
+        </div>
+        <div class="compare-col">
+          <div class="compare-tag" style="color:var(--c-amber);border-top-color:var(--c-amber)">BS — System</div>
+          <div class="compare-title">BIA System<br>Scenario 1</div>
+          <div class="compare-row"><span>Best System</span><span class="cg">B2 Greenhouse</span></div>
+          <div class="compare-row"><span>B2 HVAC</span><span class="cg">Low ✓</span></div>
+          <div class="compare-row"><span>Compat. CS1</span><span class="cg">80–90% ✓</span></div>
+          <div class="compare-row"><span>B3 Data</span><span class="cr">Gaps ⚠</span></div>
+          <div class="compare-row"><span>Elec. Range</span><span>10–14 kW</span></div>
+          <div class="compare-row"><span>S41 Best Match</span><span class="cg">B2 ideal ✓</span></div>
+          <div class="compare-row"><span>Status</span><span class="cg">Active ✓</span></div>
+        </div>
+        <div class="compare-col">
+          <div class="compare-tag" style="color:var(--c-terra);border-top-color:var(--c-terra)">WS — Waste</div>
+          <div class="compare-title">Waste<br>Scenario 1</div>
+          <div class="compare-row"><span>Water Recov.</span><span class="cg">40,000 L/yr</span></div>
+          <div class="compare-row"><span>→ to BIA</span><span class="cg">80% ✓</span></div>
+          <div class="compare-row"><span>Heat Recov.</span><span class="cg">15,000 kWh</span></div>
+          <div class="compare-row"><span>→ to BIA</span><span class="cg">70% ✓</span></div>
+          <div class="compare-row"><span>Streams</span><span>2 active</span></div>
+          <div class="compare-row"><span>Data Quality</span><span class="co">Estimates ⚠</span></div>
+          <div class="compare-row"><span>Status</span><span class="co">Partial ⚠</span></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:14px;background:#fff;border:var(--border)">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">Integrated Pathway: LS1 → CS1 → BS1 → WS1</div>
+        <div style="font-size:11px;color:var(--c-muted);line-height:1.8">Surfaces 32,33,34,40,41 (all horizontal) feed DLI data → CS1 crops (Lettuce, Basil) compatible with B2 Greenhouse on rooftop → WS1 grey water (32,000 L) and heat (10,500 kWh) reduce operational costs. <strong style="color:#000"> One feasible integrated scenario confirmed.</strong> Winter DLI deficit requires supplemental lighting Nov–Feb on all surfaces.</div>
+      </div>
+    </div>
+  </div>
+
+</main><!-- /main -->
+
+<!-- ═══════════════════════════════════
+     TAB BAR — bottom, Figma style
+════════════════════════════════════ -->
+<nav class="tabbar">
+  <a class="tab active" id="tab-home" onclick="switchTab('home')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6.5L8 2l6 4.5V14H2V6.5z"/></svg>
+    Home
+  </a>
+  <a class="tab" id="tab-ls" onclick="switchTab('ls')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="7" r="2.5"/><path d="M8 2C5.24 2 3 4.24 3 7c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z"/></svg>
+    Location
+  </a>
+  <a class="tab" id="tab-cs" onclick="switchTab('cs')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 14V6M8 6C8 6 4 5 3 2c3 0 5 2 5 4zM8 6c0 0 4-1 5-4-3 0-5 2-5 4z"/></svg>
+    Crop (CS)
+  </a>
+  <a class="tab" id="tab-bs" onclick="switchTab('bs')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="8" width="12" height="6" rx="1"/><rect x="4" y="4" width="8" height="5" rx="1"/><rect x="6" y="1" width="4" height="4" rx="1"/></svg>
+    BIA System (BS)
+  </a>
+  <a class="tab" id="tab-ws" onclick="switchTab('ws')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4c0 0-1 8 4 8s4-8 4-8" stroke-linecap="round"/><path d="M2 9c2 2 10 2 12 0" stroke-linecap="round"/></svg>
+    Waste
+  </a>
+  <a class="tab" id="tab-compare" onclick="switchTab('compare')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>
+    Compare
+  </a>
+</nav>
+
+<!-- ═══════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════ -->
+
+<script>
+
+/* ─── TAB SWITCHING ─────────────────── */
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('pg-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  // Trigger chart renders if needed
+  requestAnimationFrame(function(){
+    if(name==='ls') buildLSCharts();
+    if(name==='cs') buildCSCharts();
+    requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+  });
+}
+
+/* ─── PANEL TOGGLE ──────────────────── */
+function toggleLP(id, toggleId) {
+  const p = document.getElementById(id);
+  const t = document.getElementById(toggleId);
+  if (!p || !t) return;
+  if (p.classList.contains('closed')) {
+    p.classList.remove('closed');
+    t.textContent = '◀';
+  } else {
+    p.classList.add('closed');
+    t.textContent = '▶';
+  }
+  t.setAttribute('aria-expanded', String(!p.classList.contains('closed')));
+}
+function toggleRP(id, toggleId) {
+  const p = document.getElementById(id);
+  const t = document.getElementById(toggleId);
+  if (!p || !t) return;
+  if (p.classList.contains('closed')) {
+    p.classList.remove('closed');
+    t.textContent = '▶';
+  } else {
+    p.classList.add('closed');
+    t.textContent = '◀';
+  }
+  t.setAttribute('aria-expanded', String(!p.classList.contains('closed')));
+}
+
+/* ─── CSV PARSER ────────────────────── */
+function parseCSV(txt) {
+  const rows = txt.trim().split('\n').map(r => r.replace(/\r/g,'').split(','));
+  const h = rows[0];
+  return rows.slice(1).map(row => Object.fromEntries(h.map((k,i)=>[k,row[i]])));
+}
+
+let LOC_DB = [], LOC_SC = [], CROP_SC = [];
+let surfMeshes = [], selectedMesh = null, hovMesh = null;
+
+const DATA_PREFIX = 'files/';
+
+async function loadData() {
+  try {
+    const [ldbT, lscT, cscT] = await Promise.all([
+      fetch(DATA_PREFIX + 'Location_Database.csv').then(r => { if (!r.ok) throw new Error('Location_Database.csv'); return r.text(); }),
+      fetch(DATA_PREFIX + 'Location_Scenarios.csv').then(r => { if (!r.ok) throw new Error('Location_Scenarios.csv'); return r.text(); }),
+      fetch(DATA_PREFIX + 'Crop_Scenarios.csv').then(r => { if (!r.ok) throw new Error('Crop_Scenarios.csv'); return r.text(); }),
+    ]);
+    LOC_DB = parseCSV(ldbT).map(r => ({
+      ...r, id:+r.id, area:+r.area,
+      dli_spr:+r.dli_spr, dli_sum:+r.dli_sum, dli_aut:+r.dli_aut, dli_win:+r.dli_win,
+    }));
+    LOC_SC = parseCSV(lscT).map(r => ({ id:+r.id, locs:r.Locations.split('_').map(Number) }));
+    CROP_SC = parseCSV(cscT).map(r => ({ id:+r.id, crops:r.Crops.split('_').map(Number) }));
+    buildSurfList();
+    buildLSListPanel();
+    buildCSListPanel();
+    buildLSTopBars();
+    requestAnimationFrame(() => {
+      const active = document.querySelector('.page.active')?.id;
+      if (active === 'pg-ls') buildLSCharts();
+      if (active === 'pg-cs') buildCSCharts();
+      window.dispatchEvent(new Event('resize'));
+    });
+  } catch (err) {
+    console.error('D-SymBIA: could not load CSV data.', err);
+  }
+}
+
+function dliColor(v) { return v>=19?'#1E8C5A':v>=10?'#DBA830':v>=5?'#C8684A':'#B83020'; }
+function dliClass(v) { return v>=19?'dli-hi':v>=10?'dli-md':'dli-lo'; }
+
+function buildSurfList() {
+  const el = document.getElementById('surf-list');
+  if (!el) return;
+  el.innerHTML = '';
+  LOC_DB.forEach((s,i) => {
+    const d = document.createElement('div');
+    d.className = 'p-item'; d.dataset.idx = i;
+    const c = dliColor(s.dli_sum);
+    d.innerHTML = `<span class="p-item-dot" style="background:${c}"></span>
+      <div>S${s.id} · ${s.direction}<div class="p-item-sub">${s.area}m² · DLI sum: ${s.dli_sum}</div></div>`;
+    d.onclick = () => selectSurface(i, d);
+    el.appendChild(d);
+  });
+}
+
+function buildLSListPanel() {
+  const el = document.getElementById('ls-list-panel');
+  if (!el) return;
+  el.innerHTML = '';
+  LOC_SC.forEach(sc => {
+    const locs = sc.locs.map(lid=>LOC_DB[lid-1]).filter(Boolean);
+    const avg = locs.length ? (locs.reduce((a,b)=>a+b.dli_sum,0)/locs.length).toFixed(1) : '-';
+    const d = document.createElement('div');
+    d.className = 'p-item';
+    d.innerHTML = `<span class="p-item-dot" style="background:var(--c-blue)"></span>
+      <div>LS${sc.id} — ${sc.locs.length} surfaces<div class="p-item-sub">Avg DLI summer: ${avg} mol</div></div>`;
+    el.appendChild(d);
+  });
+}
+
+function buildCSListPanel() {
+  const el = document.getElementById('cs-list-panel');
+  if (!el) return;
+  el.innerHTML = '';
+  CROP_SC.forEach(sc => {
+    const d = document.createElement('div');
+    d.className = 'p-item';
+    d.innerHTML = `<span class="p-item-dot" style="background:var(--c-green)"></span>
+      <div>CS${sc.id} — ${sc.crops.length} crops<div class="p-item-sub">IDs: ${sc.crops.slice(0,4).join(',')}${sc.crops.length>4?'…':''}</div></div>`;
+    el.appendChild(d);
+  });
+}
+
+function buildLSTopBars() {
+  const el = document.getElementById('ls-top-bars');
+  if (!el) return;
+  const top5 = [...LOC_DB].sort((a,b)=>b.dli_sum-a.dli_sum).slice(0,5);
+  if (!top5.length) { el.innerHTML = ''; return; }
+  const max = top5[0].dli_sum;
+  el.innerHTML = top5.map(s=>`
+    <div style="padding:7px 8px;border-bottom:0.5px solid rgba(0,0,0,.08)">
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+        <strong>S${s.id}·${s.direction}</strong>
+        <span style="font-family:'DM Mono',monospace;color:var(--c-muted)">${s.dli_sum}</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${(s.dli_sum/max*100).toFixed(0)}%;background:var(--c-green)">${s.dli_sum}</div></div>
+    </div>`).join('');
+}
+
+function selectSurface(idx, el) {
+  document.querySelectorAll('#surf-list .p-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const s = LOC_DB[idx];
+  if(!s) return;
+
+  document.getElementById('rp-title').textContent = `Surface ${s.id}`;
+  document.getElementById('rp-sub').textContent = `S${s.id} — ${s.direction} Façade · ${s.area} m² · Outdoor`;
+  document.getElementById('rp-area').textContent = s.area+' m²';
+  document.getElementById('rp-orient').textContent = `${s.direction} · ${s.orientation}`;
+
+  const vals = [
+    {v:s.dli_spr,cls:dliClass(s.dli_spr)},
+    {v:s.dli_sum,cls:dliClass(s.dli_sum)},
+    {v:s.dli_aut,cls:dliClass(s.dli_aut)},
+    {v:s.dli_win,cls:dliClass(s.dli_win)},
+  ];
+  document.getElementById('rp-dli-vals').innerHTML = vals.map(x=>
+    `<div class="meta-cell ${x.cls}"><div class="val">${x.v}</div></div>`
+  ).join('');
+
+  const warn = document.getElementById('rp-warn');
+  if(s.dli_win<10) {
+    warn.style.display='block';
+    document.getElementById('rp-warn-text').textContent = `${s.dli_win} mol/m²/day — below crop minimums (10–11). Supplemental lighting needed Nov–Feb.`;
+  } else {
+    warn.style.display='none';
+  }
+
+  // 3D highlight
+  selectedMesh = idx;
+  surfMeshes.forEach((m,i) => {
+    m.material.emissiveIntensity = i===idx ? 0.75 : 0.06;
+    m.material.opacity = i===idx ? 1.0 : 0.6;
+  });
+}
+
+/* ─── VEGA-LITE CHARTS ──────────────── */
+const VL_CONFIG = {
+  font: 'Urbanist',
+  view: {stroke:null},
+  axis: {grid:false, labelFont:'DM Mono,monospace', titleFont:'Urbanist', labelFontSize:11, titleFontSize:12},
+  legend: {labelFont:'Urbanist', titleFont:'Urbanist'},
+};
+
+function buildLSCharts() {
+  if (!LOC_DB.length) return;
+  const top20 = [...LOC_DB].sort((a,b)=>b.dli_sum-a.dli_sum).slice(0,20);
+
+  // HEATMAP
+  const hData = [];
+  top20.forEach(s=>['Spring','Summer','Fall','Winter'].forEach((seas,i)=>
+    hData.push({surface:`S${s.id}·${s.direction.slice(0,2)}`, season:seas, dli:[s.dli_spr,s.dli_sum,s.dli_aut,s.dli_win][i]})
+  ));
+  vegaEmbed('#vl-heatmap', {
+    "$schema":"https://vega.github.io/schema/vega-lite/v5.json",
+    width:"container", height:280,
+    data:{values:hData},
+    mark:"rect",
+    encoding:{
+      x:{field:"season",type:"ordinal",sort:["Spring","Summer","Fall","Winter"],axis:{labelAngle:0}},
+      y:{field:"surface",type:"ordinal"},
+      color:{field:"dli",type:"quantitative",
+        scale:{range:["#ffd0c8","#fdefc0","#cdf0d0"],domain:[0,43]},
+        legend:{title:"mol/m²/d"}
+      },
+      tooltip:[{field:"surface"},{field:"season"},{field:"dli",title:"DLI",format:".1f"}]
+    },
+    config: VL_CONFIG
+  }, {actions:false}).catch(console.error);
+
+  // AREA BAR
+  const byDir = {};
+  LOC_DB.forEach(s=>{byDir[s.direction]=(byDir[s.direction]||0)+s.area;});
+  const aData = Object.entries(byDir).map(([d,a])=>({direction:d,area:Math.round(a)}));
+  const COLORS = {East:'#3B82D4',South:'#1E8C5A',West:'#DBA830',North:'#B83020',Up:'#C8684A'};
+  vegaEmbed('#vl-area-bar', {
+    "$schema":"https://vega.github.io/schema/vega-lite/v5.json",
+    width:"container", height:160,
+    data:{values:aData},
+    mark:{type:"bar",cornerRadiusTopLeft:2,cornerRadiusTopRight:2},
+    encoding:{
+      x:{field:"direction",type:"nominal",axis:{labelAngle:0,title:null}},
+      y:{field:"area",type:"quantitative",axis:{title:"Total m²"}},
+      color:{field:"direction",type:"nominal",
+        scale:{domain:Object.keys(COLORS),range:Object.values(COLORS)},legend:null},
+      tooltip:[{field:"direction"},{field:"area",title:"m²"}]
+    },
+    config: VL_CONFIG
+  }, {actions:false}).catch(console.error);
+
+  // BOXPLOT
+  const bData = [];
+  LOC_DB.forEach(s=>{
+    bData.push({season:'Spring',dli:s.dli_spr},{season:'Summer',dli:s.dli_sum},
+               {season:'Fall',dli:s.dli_aut},{season:'Winter',dli:s.dli_win});
+  });
+  vegaEmbed('#vl-boxplot', {
+    "$schema":"https://vega.github.io/schema/vega-lite/v5.json",
+    width:"container", height:180,
+    data:{values:bData},
+    mark:{type:"boxplot",extent:"min-max"},
+    encoding:{
+      x:{field:"season",type:"ordinal",sort:["Spring","Summer","Fall","Winter"],axis:{labelAngle:0,title:null}},
+      y:{field:"dli",type:"quantitative",axis:{title:"DLI mol/m²/d"}},
+      color:{field:"season",type:"nominal",
+        scale:{domain:["Spring","Summer","Fall","Winter"],range:["#3B82D4","#1E8C5A","#DBA830","#B83020"]},
+        legend:null}
+    },
+    config:{...VL_CONFIG, axis:{...VL_CONFIG.axis, grid:true, gridOpacity:0.2}}
+  }, {actions:false}).catch(console.error);
+}
+
+function buildCSCharts() {
+  if (!LOC_DB.length) return;
+  const south = LOC_DB.filter(s=>s.direction==='South').slice(0,6);
+
+  // DLI Supply vs Req
+  const sData = [];
+  south.forEach(s=>['Spring','Summer','Fall','Winter'].forEach((seas,i)=>
+    sData.push({surface:`S${s.id}`, season:seas, dli:[s.dli_spr,s.dli_sum,s.dli_aut,s.dli_win][i]})
+  ));
+  vegaEmbed('#vl-dli-supply', {
+    "$schema":"https://vega.github.io/schema/vega-lite/v5.json",
+    width:"container", height:220,
+    data:{values:sData},
+    layer:[
+      {
+        mark:{type:"bar",opacity:0.8},
+        encoding:{
+          x:{field:"season",type:"ordinal",sort:["Spring","Summer","Fall","Winter"],axis:{labelAngle:0,title:null}},
+          y:{field:"dli",type:"quantitative",axis:{title:"DLI mol/m²/d"}},
+          color:{field:"surface",type:"nominal",scale:{scheme:"tableau10"},legend:{title:"Surface"}},
+          xOffset:{field:"surface",type:"nominal"}
+        }
+      },
+      {
+        mark:{type:"rule",color:"#B83020",strokeWidth:2,strokeDash:[5,3]},
+        encoding:{y:{datum:12}}
+      }
+    ],
+    config: VL_CONFIG
+  }, {actions:false}).catch(console.error);
+
+  // Crop compare bars
+  const cData = [
+    {crop:"Lettuce",metric:"Yield (kg/m²)",val:25},
+    {crop:"Basil",metric:"Yield (kg/m²)",val:18},
+    {crop:"Lettuce",metric:"Market ($/kg)",val:4.2},
+    {crop:"Basil",metric:"Market ($/kg)",val:8.5},
+    {crop:"Lettuce",metric:"Water (L/kg)",val:20},
+    {crop:"Basil",metric:"Water (L/kg)",val:25},
+    {crop:"Lettuce",metric:"GHG (kgCO₂/kg)",val:1.2},
+    {crop:"Basil",metric:"GHG (kgCO₂/kg)",val:1.5},
+  ];
+  vegaEmbed('#vl-crop-compare', {
+    "$schema":"https://vega.github.io/schema/vega-lite/v5.json",
+    width:"container", height:200,
+    data:{values:cData},
+    mark:{type:"bar",cornerRadiusTopLeft:2,cornerRadiusTopRight:2},
+    encoding:{
+      y:{field:"metric",type:"ordinal",axis:{title:null,labelLimit:120}},
+      x:{field:"val",type:"quantitative",axis:{title:"Value"}},
+      color:{field:"crop",type:"nominal",
+        scale:{domain:["Lettuce","Basil"],range:["#1E8C5A","#DBA830"]},
+        legend:{title:"Crop"}},
+      yOffset:{field:"crop",type:"nominal"}
+    },
+    config: VL_CONFIG
+  }, {actions:false}).catch(console.error);
+}
+
+/* ─── THREE.JS (GLB Model) ──────────── */
+const canvas = document.getElementById('three-canvas');
+const vp = document.getElementById('vp');
+const loading3d = document.getElementById('loading3d');
+
+function hideLoading3d() {
+  if (loading3d) loading3d.style.display = 'none';
+}
+
+if (canvas && vp && typeof THREE !== 'undefined') {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled = true;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0E1608);
+  scene.fog = new THREE.FogExp2(0x0E1608, 0.005);
+
+  const cam = new THREE.PerspectiveCamera(45, 1, 0.1, 3000);
+  cam.position.set(0, 100, 280); cam.lookAt(0, 20, 0);
+
+  const doResize = () => {
+    const w = vp.clientWidth, h = vp.clientHeight;
+    renderer.setSize(w, h); cam.aspect = w / h; cam.updateProjectionMatrix();
+  };
+  doResize();
+  window.addEventListener('resize', doResize);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const sun = new THREE.DirectionalLight(0xfff5e0, 1.6);
+  sun.position.set(150, 300, 150); sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.left = -400; sun.shadow.camera.right = 400;
+  sun.shadow.camera.top = 400; sun.shadow.camera.bottom = -400;
+  sun.shadow.camera.near = 1; sun.shadow.camera.far = 1500;
+  scene.add(sun);
+  scene.add(Object.assign(new THREE.DirectionalLight(0x8899ff, 0.3), { position:new THREE.Vector3(-200, 80, -150) }));
+  scene.add(new THREE.GridHelper(800, 80, 0x1a2a14, 0x141c10));
+
+  (async () => {
+    try {
+      const scr = document.createElement('script');
+      scr.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+      document.head.appendChild(scr);
+      await new Promise((res, rej) => { scr.onload = res; scr.onerror = rej; });
+      const loader = new THREE.GLTFLoader();
+      loader.load(DATA_PREFIX + 'for_Arya.glb', (gltf) => {
+        const model = gltf.scene;
+        const box = new THREE.Box3().setFromObject(model);
+        const ctr = new THREE.Vector3(); box.getCenter(ctr); model.position.sub(ctr);
+        const sz = box.getSize(new THREE.Vector3()); const mx = Math.max(sz.x, sz.y, sz.z);
+        tZoom = mx * 2; cam.position.set(mx * .9, mx * .6, mx * 1.4); cam.lookAt(0, 0, 0);
+        let mi = 0;
+        model.traverse(child => {
+          if (!child.isMesh) return;
+          const loc = LOC_DB[mi];
+          if (loc) {
+            const d = loc.dli_sum;
+            const col = d >= 19 ? 0x1E8C5A : d >= 10 ? 0xDBA830 : d >= 5 ? 0xC8684A : 0xB83020;
+            child.material = new THREE.MeshLambertMaterial({ color:col, emissive:col, emissiveIntensity:.06, transparent:true, opacity:.7 });
+            child.userData = { locId:loc.id, data:loc, mIdx:mi };
+            surfMeshes.push(child);
+          } else {
+            child.material = new THREE.MeshLambertMaterial({ color:0x243020 });
+          }
+          mi++;
+        });
+        scene.add(model);
+        hideLoading3d();
+      }, undefined, () => { hideLoading3d(); fallback3D(scene); });
+    } catch (e) {
+      hideLoading3d();
+      fallback3D(scene);
+    }
+  })();
+
+  function fallback3D(scene) {
+    [[80,40,80,0,20,0,0x1a2e1a],[60,25,60,0,52,0],[40,18,40,0,70,0]].forEach(([w,h,d,x,y,z,c=0x1c301c]) => {
+      scene.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshLambertMaterial({ color:c })), { position:new THREE.Vector3(x,y,z) }));
+    });
+    LOC_DB.slice(0, 10).forEach((loc,i) => {
+      const d = loc.dli_sum, col = d >= 19 ? 0x1E8C5A : d >= 10 ? 0xDBA830 : 0xB83020;
+      const mat = new THREE.MeshLambertMaterial({ color:col, emissive:col, emissiveIntensity:.06, transparent:true, opacity:.8 });
+      const m = new THREE.Mesh(new THREE.BoxGeometry(2, 30, 30), mat);
+      m.position.set(i % 2 === 0 ? -41 : 41, 15, (i - 4) * 8);
+      m.userData = { locId:loc.id, data:loc, mIdx:i };
+      scene.add(m); surfMeshes.push(m);
+    });
+  }
+
+  const rc = new THREE.Raycaster(), mouse = new THREE.Vector2();
+  const tip = document.getElementById('surf-tip');
+  vp.addEventListener('mousemove', e => {
+    const r = vp.getBoundingClientRect();
+    mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    mouse.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    rc.setFromCamera(mouse, cam);
+    const hits = rc.intersectObjects(surfMeshes, false);
+    if (hits.length) {
+      const obj = hits[0].object;
+      if (hovMesh !== obj) {
+        if (hovMesh) hovMesh.material.emissiveIntensity = hovMesh.userData.mIdx === selectedMesh ? .75 : .06;
+        hovMesh = obj; obj.material.emissiveIntensity = .55;
+      }
+      const d = obj.userData.data;
+      if (d && tip) {
+        document.getElementById('tip-name').textContent = `Surface ${d.id}`;
+        document.getElementById('tip-dir').textContent = `${d.direction}·${d.orientation}`;
+        document.getElementById('tip-area').textContent = `${d.area}m²`;
+        document.getElementById('tip-dli').textContent = `${d.dli_sum} mol/m²/d`;
+        tip.style.left = (e.clientX - r.left + 14) + 'px'; tip.style.top = (e.clientY - r.top - 8) + 'px';
+        tip.classList.add('on');
+      }
+      vp.style.cursor = 'pointer';
+    } else {
+      if (hovMesh) {
+        hovMesh.material.emissiveIntensity = hovMesh.userData.mIdx === selectedMesh ? .75 : .06;
+        hovMesh = null;
+      }
+      if (tip) tip.classList.remove('on');
+      vp.style.cursor = 'default';
+    }
+  });
+  vp.addEventListener('click', () => {
+    const hits = rc.intersectObjects(surfMeshes, false);
+    if (!hits.length) return;
+    const obj = hits[0].object;
+    const idx = obj.userData.mIdx;
+    const el = document.querySelector(`#surf-list .p-item[data-idx="${idx}"]`);
+    selectSurface(idx, el);
+  });
+
+  let drag = false, px = 0, py = 0, rotY = .3, rotX = .22, tY = .3, tX = .22, zoom = 280;
+  let tZoom = 280;
+  vp.addEventListener('mousedown', e => { if (e.target === canvas) { drag = true; px = e.clientX; py = e.clientY; } });
+  window.addEventListener('mouseup', () => { drag = false; });
+  window.addEventListener('mousemove', e => {
+    if (!drag) return;
+    tY += (e.clientX - px) * .009; tX += (e.clientY - py) * .006;
+    tX = Math.max(-.05, Math.min(1.1, tX)); px = e.clientX; py = e.clientY;
+  });
+  vp.addEventListener('wheel', e => { e.preventDefault(); tZoom = Math.max(50, Math.min(700, tZoom + e.deltaY * .4)); }, { passive:false });
+
+  let t = 0;
+  (function loop() {
+    requestAnimationFrame(loop); t += .005;
+    if (!drag) tY += .0012;
+    rotY += (tY - rotY) * .07; rotX += (tX - rotX) * .07; zoom += (tZoom - zoom) * .08;
+    cam.position.x = Math.sin(rotY) * Math.cos(rotX) * zoom;
+    cam.position.y = Math.sin(rotX) * zoom + 10;
+    cam.position.z = Math.cos(rotY) * Math.cos(rotX) * zoom;
+    cam.lookAt(0, 8, 0);
+    surfMeshes.forEach((m,i) => {
+      if (m !== hovMesh && i !== selectedMesh) m.material.emissiveIntensity = .04 + Math.sin(t + i * .9) * .04;
+    });
+    renderer.render(scene, cam);
+  })();
+} else {
+  hideLoading3d();
+}
+
+document.querySelectorAll('.lp-toggle, .rp-toggle').forEach(btn => {
+  btn.setAttribute('role', 'button');
+  btn.setAttribute('tabindex', '0');
+  const panelId = btn.id.replace(/-toggle$/, '');
+  const isLeft = btn.classList.contains('lp-toggle');
+  const p = document.getElementById(panelId);
+  if (p) btn.setAttribute('aria-expanded', String(!p.classList.contains('closed')));
+  btn.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (isLeft) toggleLP(panelId, btn.id);
+      else toggleRP(panelId, btn.id);
+    }
+  });
+});
+
+loadData();
+
+</script>
+</body>
+</html>
