@@ -1,0 +1,2 @@
+What have I done so far?
+I’ve managed to turn the D-SymBIA concept into a working single-page dashboard. Right now, I have all 6 tabs (Home, Location, Crop, BIA System, Waste, Compare) set up. My biggest win this week was moving away from the broken Vega-Lite charts and fully integrating Tableau Public instead. I’ve successfully embedded the Seasonal Solar Heatmap, the DLI Supply comparison, and a "Lollipop Chart" for crop performance. All these are pulling from my real datasets like Location_Database.csv and Crop_Scenarios.csv, so the values actually mean something.
