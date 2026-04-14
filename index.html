@@ -397,6 +397,23 @@ body {
 .chart-section:last-child { border-bottom: none; margin-bottom: 0; }
 .chart-h2 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
 .chart-sub { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--c-muted); margin-bottom: 12px; }
+/* Responsive Tableau box (4:3); avoids 0-height object embed when Location tab starts hidden */
+.tableau-dli-wrap {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 75%;
+  overflow: hidden;
+  background: #fafafa;
+}
+.tableau-dli-wrap iframe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
 .vl-chart {
   min-height: 200px;
   width: 100%;
@@ -766,20 +783,56 @@ body {
       <div class="center-scroll">
         <div class="chart-section">
           <div class="chart-h2">DLI Heatmap — Top 20 Surfaces</div>
-          <div class="chart-sub">Vega-Lite · mol PAR/m²/day · Location_Database.csv · Sorted by summer DLI</div>
-          <div id="vl-heatmap" class="vl-chart"></div>
+          <div class="chart-sub">Tableau Public · mol PAR/m²/day · Location_Database.csv · Sorted by summer DLI</div>
+          <!-- iframe: object+viz_v1 gives 0 height when tab hidden on load (offsetWidth=0). iframe + aspect-ratio works on Live Server. -->
+          <div class="tableau-dli-wrap">
+            <iframe
+              title="DLI heat map — Tableau"
+              src="https://public.tableau.com/views/Book1_17761265896090/Sheet1?:showVizHome=no&amp;:embed=y&amp;:display_count=y&amp;:toolbar=yes&amp;:tabs=no&amp;:origin=viz_share_link"
+              allowfullscreen
+            ></iframe>
+          </div>
         </div>
         <div class="chart-section">
           <div class="chart-h2">Surface Area by Direction</div>
-          <div class="chart-sub">Vega-Lite bar · m² total · All 49 surfaces grouped by orientation</div>
-          <div id="vl-area-bar" class="vl-chart"></div>
+          <div class="chart-sub">Tableau Public · m² total · All 49 surfaces grouped by orientation</div>
+          <div class="tableau-dli-wrap">
+            <iframe
+              title="Surface area by direction — Tableau"
+              src="https://public.tableau.com/views/Book1_17761265896090/Sheet2?:showVizHome=no&amp;:embed=y&amp;:display_count=y&amp;:toolbar=yes&amp;:tabs=no&amp;:origin=viz_share_link"
+              allowfullscreen
+            ></iframe>
+          </div>
         </div>
         <div class="chart-section">
           <div class="chart-h2">DLI Range by Season</div>
-          <div class="chart-sub">Vega-Lite boxplot · All 49 surfaces · Min / median / max</div>
-          <div id="vl-boxplot" class="vl-chart"></div>
+          <div class="chart-sub">Tableau Public Analysis · Seasonal Variations</div>
+          
+          <div class='tableauPlaceholder' id='viz1776127561756' style='position: relative; width: 100%;'>
+            <noscript>
+              <a href='#'><img alt='Sheet 3 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Bo&#47;Book1_17761265896090&#47;Sheet3&#47;1_rss.png' style='border: none' /></a>
+            </noscript>
+            <object class='tableauViz' style='display:none;'>
+              <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> 
+              <param name='embed_code_version' value='3' /> 
+              <param name='name' value='Book1_17761265896090&#47;Sheet3' />
+              <param name='tabs' value='no' />
+              <param name='toolbar' value='yes' />
+              <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Bo&#47;Book1_17761265896090&#47;Sheet3&#47;1.png' /> 
+              <param name='filter' value='publish=yes' />
+            </object>
+          </div>                
+          <script type='text/javascript'>                    
+            var divElement = document.getElementById('viz1776127561756');                    
+            var vizElement = divElement.getElementsByTagName('object')[0];                    
+            vizElement.style.width='100%';
+            vizElement.style.height='450px';
+            var scriptElement = document.createElement('script');                    
+            scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    
+            vizElement.parentNode.insertBefore(scriptElement, vizElement);                
+          </script>
         </div>
-      </div>
+      </div> ```
       <div class="rp" id="rp-ls">
         <div class="rp-toggle" id="rp-ls-toggle" onclick="toggleRP('rp-ls','rp-ls-toggle')">▶</div>
         <div class="rp-h2" style="border-bottom:2.5px solid var(--c-blue)">Key Findings</div>
@@ -815,42 +868,118 @@ body {
       </div>
       <div class="center-scroll">
         <div class="chart-section">
-          <div class="chart-h2">Multi-Attribute Comparison — CS1</div>
-          <div class="chart-sub">Radar · Yield · Water · GHG · Speed · BC Market value</div>
-          <div style="display:flex;justify-content:center;padding:8px 0">
-            <svg width="290" height="270" viewBox="0 0 290 270">
-              <ellipse cx="145" cy="130" rx="90" ry="90" class="ra"/>
-              <ellipse cx="145" cy="130" rx="60" ry="60" class="ra"/>
-              <ellipse cx="145" cy="130" rx="30" ry="30" class="ra"/>
-              <line x1="145" y1="40" x2="145" y2="220" class="rl"/>
-              <line x1="59" y1="87" x2="231" y2="173" class="rl"/>
-              <line x1="59" y1="173" x2="231" y2="87" class="rl"/>
-              <line x1="55" y1="130" x2="235" y2="130" class="rl"/>
-              <line x1="97" y1="43" x2="193" y2="217" class="rl"/>
-              <polygon points="145,50 223,98 206,185 84,185 67,98" fill="rgba(30,140,90,.2)" stroke="#1E8C5A" stroke-width="1.5"/>
-              <polygon points="145,70 213,110 198,180 92,180 77,110" fill="rgba(219,168,48,.18)" stroke="#DBA830" stroke-width="1.5"/>
-              <text x="145" y="28" text-anchor="middle" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Yield</text>
-              <text x="248" y="89" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Water</text>
-              <text x="205" y="208" text-anchor="middle" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Low GHG</text>
-              <text x="85" y="208" text-anchor="middle" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Speed</text>
-              <text x="20" y="89" font-size="10" fill="#555" font-family="Urbanist,sans-serif">Market</text>
-              <rect x="30" y="248" width="9" height="9" fill="#1E8C5A" opacity=".8"/>
-              <text x="43" y="257" font-size="11" fill="#333" font-family="Urbanist,sans-serif">Lettuce</text>
-              <rect x="115" y="248" width="9" height="9" fill="#DBA830" opacity=".8"/>
-              <text x="128" y="257" font-size="11" fill="#333" font-family="Urbanist,sans-serif">Basil</text>
-            </svg>
-          </div>
+          <div class="chart-section">
+            <div class="chart-h2">Seasonal Solar Distribution Matrix</div>
+            <div class="chart-sub">DLI Performance by Orientation • Tableau Heatmap Analysis</div>
+            
+            <div class="tableau-heatmap-wrapper" style="width:100%; margin-top:15px;">
+                <div class="tableauPlaceholder" id="viz1776131728119" style="position: relative">
+                    <noscript>
+                        <a href="#"><img alt="Seasonal Solar Distribution" src="https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Bo&#47;Book1_17761265896090&#47;Sheet5&#47;1_rss.png" style="border: none" /></a>
+                    </noscript>
+                    <object class="tableauViz" style="display:none;">
+                        <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+                        <param name="embed_code_version" value="3" />
+                        <param name="site_root" value="" />
+                        <param name="name" value="Book1_17761265896090&#47;Sheet5" />
+                        <param name="tabs" value="no" />
+                        <param name="toolbar" value="yes" />
+                        <param name="static_image" value="https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Bo&#47;Book1_17761265896090&#47;Sheet5&#47;1.png" />
+                        <param name="animate_transition" value="yes" />
+                        <param name="display_static_image" value="yes" />
+                        <param name="display_spinner" value="yes" />
+                        <param name="display_overlay" value="yes" />
+                        <param name="display_count" value="yes" />
+                        <param name="language" value="en-US" />
+                        <param name="filter" value="publish=yes" />
+                    </object>
+                </div>
+                <script type="text/javascript">
+                    var divElement = document.getElementById('viz1776131728119');
+                    var vizElement = divElement.getElementsByTagName('object')[0];
+                    vizElement.style.width = '100%';
+                    vizElement.style.height = '350px';  
+                    var scriptElement = document.createElement('script');
+                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                    vizElement.parentNode.insertBefore(scriptElement, vizElement);
+                </script>
+            </div>
+        </div>
         </div>
         <div class="chart-section">
-          <div class="chart-h2">DLI Supply vs Crop Requirement — South Surfaces</div>
-          <div class="chart-sub">Vega-Lite grouped bar · Dashed line = 12 mol minimum · Real CSV data</div>
-          <div id="vl-dli-supply" class="vl-chart"></div>
-        </div>
-        <div class="chart-section">
-          <div class="chart-h2">Crop Parameters — CS1</div>
-          <div class="chart-sub">Vega-Lite horizontal bar · Side-by-side comparison</div>
-          <div id="vl-crop-compare" class="vl-chart"></div>
-        </div>
+          <div class="chart-h2">DLI Supply vs Crop Requirement</div>
+          <div class="chart-sub">Seasonal Performance vs. Minimum Growth Thresholds</div>
+          
+          <div class="tableau-supply-wrapper" style="width:100%; margin-top:15px;">
+              <div class='tableauPlaceholder' id='viz1776132685467' style='position: relative'>
+                  <noscript>
+                      <a href='#'><img alt='Sheet 6 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Bo&#47;Book1_17761265896090&#47;Sheet6&#47;1_rss.png' style='border: none' /></a>
+                  </noscript>
+                  <object class='tableauViz' style='display:none;'>
+                      <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                      <param name='embed_code_version' value='3' />
+                      <param name='site_root' value='' />
+                      <param name='name' value='Book1_17761265896090&#47;Sheet6' />
+                      <param name='tabs' value='no' />
+                      <param name='toolbar' value='yes' />
+                      <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Bo&#47;Book1_17761265896090&#47;Sheet6&#47;1.png' />
+                      <param name='animate_transition' value='yes' />
+                      <param name='display_static_image' value='yes' />
+                      <param name='display_spinner' value='yes' />
+                      <param name='display_overlay' value='yes' />
+                      <param name='display_count' value='yes' />
+                      <param name='language' value='en-US' />
+                      <param name='filter' value='publish=yes' />
+                  </object>
+              </div>
+              <script type='text/javascript'>
+                  var divElement = document.getElementById('viz1776132685467');
+                  var vizElement = divElement.getElementsByTagName('object')[0];
+                  vizElement.style.width = '100%';
+                  vizElement.style.height = '350px'; // Bu sabit değer yan panelle hizayı korur
+                  var scriptElement = document.createElement('script');
+                  scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                  vizElement.parentNode.insertBefore(scriptElement, vizElement);
+              </script>
+              </div>
+      </div>
+      <div class="chart-section">
+        <div class="chart-h2">Crop Performance Metrics</div>
+        <div class="chart-sub">Comparative Analysis of Yield, Resource Use & Efficiency</div>
+        
+        <div class="tableau-crop-wrapper" style="width:100%; margin-top:15px;">
+            <div class='tableauPlaceholder' id='viz1776133345312' style='position: relative'>
+                <noscript>
+                    <a href='#'><img alt='Sheet 7 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Bo&#47;Book1_17761265896090&#47;Sheet7&#47;1_rss.png' style='border: none' /></a>
+                </noscript>
+                <object class='tableauViz' style='display:none;'>
+                    <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                    <param name='embed_code_version' value='3' />
+                    <param name='site_root' value='' />
+                    <param name='name' value='Book1_17761265896090&#47;Sheet7' />
+                    <param name='tabs' value='no' />
+                    <param name='toolbar' value='yes' />
+                    <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Bo&#47;Book1_17761265896090&#47;Sheet7&#47;1.png' />
+                    <param name='animate_transition' value='yes' />
+                    <param name='display_static_image' value='yes' />
+                    <param name='display_spinner' value='yes' />
+                    <param name='display_overlay' value='yes' />
+                    <param name='display_count' value='yes' />
+                    <param name='language' value='en-US' />
+                    <param name='filter' value='publish=yes' />
+                </object>
+            </div>
+            <script type='text/javascript'>
+                var divElement = document.getElementById('viz1776133345312');
+                var vizElement = divElement.getElementsByTagName('object')[0];
+                vizElement.style.width = '100%';
+                vizElement.style.height = '350px'; // Sayfa düzenini korumak için sabit yükseklik
+                var scriptElement = document.createElement('script');
+                scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                vizElement.parentNode.insertBefore(scriptElement, vizElement);
+            </script>
+            </div>
+    </div>
       </div>
       <div class="rp" id="rp-cs">
         <div class="rp-toggle" id="rp-cs-toggle" onclick="toggleRP('rp-cs','rp-cs-toggle')">▶</div>
@@ -1310,49 +1439,6 @@ const VL_CONFIG = {
 
 function buildLSCharts() {
   if (!LOC_DB.length) return;
-  const top20 = [...LOC_DB].sort((a,b)=>b.dli_sum-a.dli_sum).slice(0,20);
-
-  // HEATMAP
-  const hData = [];
-  top20.forEach(s=>['Spring','Summer','Fall','Winter'].forEach((seas,i)=>
-    hData.push({surface:`S${s.id}·${s.direction.slice(0,2)}`, season:seas, dli:[s.dli_spr,s.dli_sum,s.dli_aut,s.dli_win][i]})
-  ));
-  vegaEmbed('#vl-heatmap', {
-    "$schema":"https://vega.github.io/schema/vega-lite/v5.json",
-    width:"container", height:280,
-    data:{values:hData},
-    mark:"rect",
-    encoding:{
-      x:{field:"season",type:"ordinal",sort:["Spring","Summer","Fall","Winter"],axis:{labelAngle:0}},
-      y:{field:"surface",type:"ordinal"},
-      color:{field:"dli",type:"quantitative",
-        scale:{range:["#ffd0c8","#fdefc0","#cdf0d0"],domain:[0,43]},
-        legend:{title:"mol/m²/d"}
-      },
-      tooltip:[{field:"surface"},{field:"season"},{field:"dli",title:"DLI",format:".1f"}]
-    },
-    config: VL_CONFIG
-  }, {actions:false}).catch(console.error);
-
-  // AREA BAR
-  const byDir = {};
-  LOC_DB.forEach(s=>{byDir[s.direction]=(byDir[s.direction]||0)+s.area;});
-  const aData = Object.entries(byDir).map(([d,a])=>({direction:d,area:Math.round(a)}));
-  const COLORS = {East:'#3B82D4',South:'#1E8C5A',West:'#DBA830',North:'#B83020',Up:'#C8684A'};
-  vegaEmbed('#vl-area-bar', {
-    "$schema":"https://vega.github.io/schema/vega-lite/v5.json",
-    width:"container", height:160,
-    data:{values:aData},
-    mark:{type:"bar",cornerRadiusTopLeft:2,cornerRadiusTopRight:2},
-    encoding:{
-      x:{field:"direction",type:"nominal",axis:{labelAngle:0,title:null}},
-      y:{field:"area",type:"quantitative",axis:{title:"Total m²"}},
-      color:{field:"direction",type:"nominal",
-        scale:{domain:Object.keys(COLORS),range:Object.values(COLORS)},legend:null},
-      tooltip:[{field:"direction"},{field:"area",title:"m²"}]
-    },
-    config: VL_CONFIG
-  }, {actions:false}).catch(console.error);
 
   // BOXPLOT
   const bData = [];
