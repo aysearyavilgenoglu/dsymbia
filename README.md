@@ -37,11 +37,6 @@ bash# Clone the repo
 git clone https://github.com/aysearyavilgenoglu/dsymbia.git
 cd dsymbia
 
-# Serve locally (required for CSV loading)
-python3 -m http.server 8080
-
-# Open in browser
-open http://localhost:8080/index.html
-
+ 
 Project Context
 This dashboard is part of the Computational Design Lab's research on scenario-based BIA integration in architectural design, supported by the BC Centre for Agritech Innovation (BC CAI) and Perkins&Will Canada Architects.
