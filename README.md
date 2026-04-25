@@ -9,7 +9,7 @@ About
 D-SymBIA is an interactive scenario-based dashboard for exploring Building-Integrated Agriculture (BIA) opportunities in architectural design. It operationalizes the Computational Design Lab's BIA scenario framework — helping architects and urban designers compare multiple "what-if" pathways across location, crop type, BIA system, and waste circularity, rather than evaluating a single solution at a time.
 
 Features
-TabContent.  HomeBuilding illustration color-coded by DLI suitability · Surface selector · Seasonal DLI panel. Location (LS)Vega-Lite DLI heatmap · Seasonal boxplot · Area by direction · 49 real surfaces🌿 Crop (CS)Radar chart · DLI supply vs. requirement · Crop parameter comparison🏗 BIA System (BS)Vega-Lite operational requirements · Compatibility heatmap💧 Waste (WS)Resource flow diagram · Greywater + HVAC heat recovery⊞ CompareAll four scenarios side by side
+TabContent.  HomeBuilding illustration color-coded by DLI suitability · Surface selector · Seasonal DLI panel. Location (LS)Vega-Lite DLI heatmap · Seasonal boxplot · Area by direction · 49 real surfaces.Crop (CS)Radar chart · DLI supply vs. requirement · Crop parameter comparison BIA System (BS)Vega-Lite operational requirements · Compatibility heatmap. Waste (WS)Resource flow diagram · Greywater + HVAC heat recovery⊞ CompareAll four scenarios side by side
 
 Dataset
 
